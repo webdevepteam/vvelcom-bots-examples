@@ -1,0 +1,13 @@
+{
+  "name": "vvelcom-echo-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env bot.mjs"
+  },
+  "engines": {
+    "node": ">=20.6"
+  }
+}
+
