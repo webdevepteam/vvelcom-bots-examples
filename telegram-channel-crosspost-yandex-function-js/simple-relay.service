@@ -1,0 +1,30 @@
+[Unit]
+Description=Restricted outbound HTTP relay
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=relay
+Group=relay
+WorkingDirectory=/home
+EnvironmentFile=/home/relay.env
+ExecStart=/usr/bin/gunicorn \
+  --workers 1 \
+  --bind 127.0.0.1:9010 \
+  --access-logfile - \
+  --error-logfile - \
+  --log-level info \
+  --capture-output \
+  'restricted_relay:app'
+
+Restart=on-failure
+RestartSec=3
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=false
+
+[Install]
+WantedBy=multi-user.target
