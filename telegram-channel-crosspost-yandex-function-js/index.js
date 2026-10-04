@@ -654,7 +654,9 @@ function buildVvelcomRequest(payload, upload) {
     form.append(name, String(value));
   }
 
-  form.append(upload.field, new Blob([upload.buffer], { type: upload.contentType }), upload.filename);
+  for (const file of [].concat(upload)) {
+    form.append(file.field, new Blob([file.buffer], { type: file.contentType }), file.filename);
+  }
 
   return { method: 'POST', body: form };
 }
@@ -754,7 +756,7 @@ async function callVvelcom(method, payload, upload = null) {
   большой), пост всё равно уходит текстом с пометкой и ссылкой на оригинал.
 */
 async function sendPostToVvelcom(post, matchedKeywords) {
-  // Фото, затем видео; каждое — отдельное сообщение (альбомов в API пока нет).
+  // Фото, затем видео.
   const mediaItems = [
     ...post.photoUrls.map((url) => ({ method: 'sendPhoto', field: 'photo', url })),
     ...post.videoUrls.map((url) => ({ method: 'sendVideo', field: 'video', url }))
@@ -768,8 +770,13 @@ async function sendPostToVvelcom(post, matchedKeywords) {
     const fitsCaption = (post.text || '').length + 200 <= PHOTO_CAPTION_MAX_LENGTH;
 
     try {
-      for (const [index, item] of mediaItems.entries()) {
-        const extra = index === 0 && fitsCaption ? { caption } : {};
+      // Несколько фото уходят одним сообщением (альбомом); остальное — по одному.
+      const albumSent = await trySendPhotoAlbum(post, mediaItems, fitsCaption ? caption : '');
+      const singles = albumSent ? mediaItems.filter((item) => item.field !== 'photo') : mediaItems;
+      const captionGoesToFirstSingle = fitsCaption && !albumSent;
+
+      for (const [index, item] of singles.entries()) {
+        const extra = index === 0 && captionGoesToFirstSingle ? { caption } : {};
         let image = null;
 
         // Фото сначала скачиваем сами и загружаем файлом; не вышло — просим VVelcom скачать по ссылке.
@@ -812,6 +819,47 @@ async function sendPostToVvelcom(post, matchedKeywords) {
   }
 
   await callVvelcom('sendMessage', { text: buildOutboundText(post, matchedKeywords) });
+}
+
+/*
+  Если в посте несколько фото — отправляет их ОДНИМ сообщением (sendMediaGroup) с подписью
+  у первого. Возвращает true, если альбом ушёл. Любая неудача (не скачались фото, старая версия
+  сервера без sendMediaGroup, 400) — false: тогда фото уйдут по одному, ничего не теряется.
+*/
+async function trySendPhotoAlbum(post, mediaItems, caption) {
+  const photoItems = mediaItems.filter((item) => item.field === 'photo');
+
+  if (photoItems.length < 2) {
+    return false;
+  }
+
+  try {
+    const images = [];
+
+    for (const item of photoItems) {
+      images.push(await downloadImage(item.url));
+    }
+
+    const uploads = images.map((image, index) => ({ field: `file${index}`, ...image }));
+
+    await callVvelcom('sendMediaGroup', {
+      media: JSON.stringify(images.map((_, index) => ({
+        type: 'photo',
+        media: `attach://file${index}`,
+        ...(index === 0 && caption ? { caption } : {})
+      })))
+    }, uploads);
+
+    log('INFO', 'album_sent', { messageId: post.messageId, photos: images.length });
+
+    await sleep(SEND_DELAY_MS);
+
+    return true;
+  } catch (error) {
+    log('WARN', 'album_failed_fallback_to_singles', { messageId: post.messageId, error: error.message });
+
+    return false;
+  }
 }
 
 async function processChannel(channelUrl) {
