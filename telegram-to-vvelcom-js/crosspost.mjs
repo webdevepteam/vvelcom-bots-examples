@@ -2,7 +2,7 @@ const required = [
   'TELEGRAM_BOT_TOKEN',
   'TELEGRAM_SOURCE_CHANNEL',
   'VVELCOM_BOT_TOKEN',
-  'VVELCOM_CHANNEL_ID',
+  'VVELCOM_CHANNEL',
 ];
 const missing = required.filter((name) => !process.env[name]?.trim());
 if (missing.length) throw new Error(`Заполните переменные в .env: ${missing.join(', ')}`);
@@ -10,7 +10,11 @@ if (missing.length) throw new Error(`Заполните переменные в 
 const telegramApi = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN.trim()}`;
 const vvelcomApi = `https://apibots.vvelcom.online/bot${process.env.VVELCOM_BOT_TOKEN.trim()}`;
 const sourceChannel = process.env.TELEGRAM_SOURCE_CHANNEL.trim().toLowerCase();
-const targetChannel = process.env.VVELCOM_CHANNEL_ID.trim();
+// Канал VVelcom — по нику (`@my_channel` или `my_channel`); подойдёт и UUID.
+const channelValue = process.env.VVELCOM_CHANNEL.trim();
+const targetChannel = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(channelValue)
+  ? channelValue
+  : `@${channelValue.replace(/^@/, '')}`;
 const addSourceLink = process.env.ADD_SOURCE_LINK !== 'false';
 
 async function apiCall(base, method, payload = {}) {

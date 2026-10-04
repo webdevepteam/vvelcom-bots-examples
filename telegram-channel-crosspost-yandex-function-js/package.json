@@ -1,0 +1,11 @@
+{
+  "name": "telegram-channel-crosspost-vvelcom",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "sqlite3": "^5.1.7"
+  }
+}
