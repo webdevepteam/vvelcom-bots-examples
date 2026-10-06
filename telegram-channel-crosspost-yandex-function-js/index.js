@@ -53,7 +53,6 @@ const VVELCOM_API_BASE = 'https://apibots.vvelcom.online';
 const SEND_DELAY_MS = 1100;
 const MAX_SEND_ATTEMPTS = 3;
 const MAX_MEDIA_PER_POST = 10;
-const PHOTO_CAPTION_MAX_LENGTH = 1000;
 
 function parseJsonArray(variableName, rawValue) {
   let parsed;
@@ -608,7 +607,7 @@ function parseTelegramPreview(html, username) {
 }
 
 // `imagesAttached` — фото/видео уйдут вместе с этим текстом, пометка про них не нужна.
-function buildOutboundText(post, matchedKeywords, { imagesAttached = false, maxLength = 3900 } = {}) {
+function buildOutboundText(post, matchedKeywords, { imagesAttached = false } = {}) {
   const header = matchedKeywords.length > 0
     ? `Совпадения: ${matchedKeywords.join(', ')}\n\n`
     : '';
@@ -620,14 +619,9 @@ function buildOutboundText(post, matchedKeywords, { imagesAttached = false, maxL
   const body = post.text || (imagesAttached ? '' : 'Публикация содержит фото или видео без подписи.');
   const footer = `${mediaNote}\n\nИсточник: ${post.postUrl}`;
 
-  // Лимит sendMessage — 4096 символов, подписи к фото — 1024.
-  const availableTextLength = Math.max(1, maxLength - header.length - footer.length);
-
-  const truncatedBody = body.length > availableTextLength
-    ? `${body.slice(0, availableTextLength - 1)}…`
-    : body;
-
-  return `${header}${truncatedBody}${footer}`;
+  // Длину не режем: VVelcom сам разбивает длинный текст на сообщения по 4096 символов
+  // (подпись к фото — первые 4096, остаток идёт следующими сообщениями).
+  return `${header}${body}${footer}`;
 }
 
 class VvelcomHttpError extends Error {
@@ -750,8 +744,8 @@ async function callVvelcom(method, payload, upload = null) {
 
 /*
   Публикует пост: фото и видео (до 10 файлов; платформа сама скачивает их
-  по ссылке и сжимает) и текст. Первый файл получает подпись, если она влезает
-  в лимит подписи; иначе текст уходит отдельным сообщением после файлов.
+  по ссылке и сжимает) и текст. Первый файл получает подпись целиком;
+  если текст длиннее 4096 символов, VVelcom сам отправит остаток следующими сообщениями.
   Если файл не приняли (400 — недоступная ссылка, не фото/видео, слишком
   большой), пост всё равно уходит текстом с пометкой и ссылкой на оригинал.
 */
@@ -763,17 +757,13 @@ async function sendPostToVvelcom(post, matchedKeywords) {
   ].slice(0, MAX_MEDIA_PER_POST);
 
   if (mediaItems.length > 0) {
-    const caption = buildOutboundText(post, matchedKeywords, {
-      imagesAttached: true,
-      maxLength: PHOTO_CAPTION_MAX_LENGTH
-    });
-    const fitsCaption = (post.text || '').length + 200 <= PHOTO_CAPTION_MAX_LENGTH;
+    const caption = buildOutboundText(post, matchedKeywords, { imagesAttached: true });
 
     try {
       // Несколько фото уходят одним сообщением (альбомом); остальное — по одному.
-      const albumSent = await trySendPhotoAlbum(post, mediaItems, fitsCaption ? caption : '');
+      const albumSent = await trySendPhotoAlbum(post, mediaItems, caption);
       const singles = albumSent ? mediaItems.filter((item) => item.field !== 'photo') : mediaItems;
-      const captionGoesToFirstSingle = fitsCaption && !albumSent;
+      const captionGoesToFirstSingle = !albumSent;
 
       for (const [index, item] of singles.entries()) {
         const extra = index === 0 && captionGoesToFirstSingle ? { caption } : {};
@@ -795,12 +785,6 @@ async function sendPostToVvelcom(post, matchedKeywords) {
         }
 
         await sleep(SEND_DELAY_MS);
-      }
-
-      if (!fitsCaption) {
-        await callVvelcom('sendMessage', {
-          text: buildOutboundText(post, matchedKeywords, { imagesAttached: true })
-        });
       }
 
       return;
