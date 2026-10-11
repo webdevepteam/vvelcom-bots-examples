@@ -27,6 +27,7 @@ curl -X POST "https://apibots.vvelcom.online/bot$VVELCOM_BOT_TOKEN/deleteWebhook
 | [`yandex-ai-python`](./yandex-ai-python/) | Python 3.10+ | Диалог с YandexGPT через Yandex Cloud AI Studio |
 | [`yandex-ai-function-python`](./yandex-ai-function-python/) | Yandex Cloud Functions, Python 3.12 | Рекомендуемый серверный ИИ-бот с webhook и командами |
 | [`telegram-to-vvelcom-js`](./telegram-to-vvelcom-js/) | Node.js 18+ | Кросспостинг текстовых публикаций из Telegram-канала в канал VVelcom |
+| [`telegram-channel-crosspost-gigachat-yandex-function-js`](./telegram-channel-crosspost-gigachat-yandex-function-js/) | Yandex Cloud Functions, Node.js 22 | Кросспост с ИИ-фильтром GigaChat Lite и чат-бот с ответами на вопросы |
 
 ## Как бот попадает в группу или канал
 
