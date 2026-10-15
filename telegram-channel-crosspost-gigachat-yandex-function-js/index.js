@@ -13,7 +13,7 @@ import path from 'node:path';
   передаются JSON-строками и разбираются через JSON.parse().
 */
 const {
-  CHANNELS_JSON = '["https://t.me/s/bmpd_cast"]',
+  CHANNELS_JSON = '[]',
   KEYWORDS_JSON = '[]',
 
   LOOKBACK_MINUTES = '70',

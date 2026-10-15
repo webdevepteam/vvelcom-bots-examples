@@ -1,0 +1,12 @@
+{
+  "name": "vvelcom-shopping-list-gigachat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Yandex Cloud Function: checklists (shopping, to-do, any kind set by a prompt) from voice and text messages in VVelcom (transcribeVoice + GigaChat)",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {}
+}

@@ -22,13 +22,14 @@ curl -X POST "https://apibots.vvelcom.online/bot$VVELCOM_BOT_TOKEN/deleteWebhook
 
 | Пример | Язык | Что показывает |
 |---|---|---|
-| [`echo-python`](./echo-python/) | Python 3.10+ | Самый короткий эхо-бот без фреймворка |
-| [`echo-js`](./echo-js/) | Node.js 18+ | Базовая работа с Bot API через встроенный `fetch` |
-| [`yandex-ai-python`](./yandex-ai-python/) | Python 3.10+ | Диалог с YandexGPT через Yandex Cloud AI Studio |
-| [`yandex-ai-function-python`](./yandex-ai-function-python/) | Yandex Cloud Functions, Python 3.12 | Рекомендуемый серверный ИИ-бот с webhook и командами |
-| [`sudoku`](./sudoku/) | Yandex Cloud Functions, Node.js 22 + статический веб-апп | Мини-приложение «Судоку»: `/start` с кнопкой «Играть», результат в чат и «В ленту» |
-| [`telegram-to-vvelcom-js`](./telegram-to-vvelcom-js/) | Node.js 18+ | Кросспостинг текстовых публикаций из Telegram-канала в канал VVelcom |
-| [`telegram-channel-crosspost-gigachat-yandex-function-js`](./telegram-channel-crosspost-gigachat-yandex-function-js/) | Yandex Cloud Functions, Node.js 22 | Кросспост с ИИ-фильтром GigaChat Lite и чат-бот с ответами на вопросы |
+| [`echo-python`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/echo-python) | Python 3.10+ | Самый короткий эхо-бот без фреймворка |
+| [`echo-js`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/echo-js) | Node.js 18+ | Базовая работа с Bot API через встроенный `fetch` |
+| [`yandex-ai-python`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/yandex-ai-python) | Python 3.10+ | Диалог с YandexGPT через Yandex Cloud AI Studio |
+| [`yandex-ai-function-python`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/yandex-ai-function-python) | Yandex Cloud Functions, Python 3.12 | Рекомендуемый серверный ИИ-бот с webhook и командами |
+| [`sudoku`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/sudoku) | Yandex Cloud Functions, Node.js 22 + статический веб-апп | Мини-приложение «Судоку»: `/start` с кнопкой «Играть», результат в чат и «В ленту» |
+| [`telegram-to-vvelcom-js`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/telegram-to-vvelcom-js) | Node.js 18+ | Кросспостинг текстовых публикаций из Telegram-канала в канал VVelcom |
+| [`telegram-channel-crosspost-gigachat-yandex-function-js`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/telegram-channel-crosspost-gigachat-yandex-function-js) | Yandex Cloud Functions, Node.js 22 | Кросспост с ИИ-фильтром GigaChat Lite и чат-бот с ответами на вопросы |
+| [`shopping-list-gigachat-yandex-function-js`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/shopping-list-gigachat-yandex-function-js) | Yandex Cloud Functions, Node.js 22 | Списки покупок и дел из голосовых и текста: `transcribeVoice`, GigaChat, промпт и модель в переменных функции, чекбоксы, история 10 списков |
 
 ## Как бот попадает в группу или канал
 

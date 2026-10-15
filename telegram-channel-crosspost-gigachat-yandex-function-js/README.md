@@ -93,7 +93,7 @@ curl -X POST "https://apibots.vvelcom.online/bot$VVELCOM_BOT_TOKEN/setWebhook" \
 |---|---|---|
 | `VVELCOM_BOT_TOKEN` | — | токен бота (Lockbox) |
 | `VVELCOM_CHANNEL` | — | ник канала VVelcom (`@my_channel` или `my_channel`); подойдёт и UUID канала |
-| `CHANNELS_JSON` | `["https://t.me/s/bmpd_cast"]` | JSON-массив публичных Telegram-каналов |
+| `CHANNELS_JSON` | `[]` | JSON-массив публичных Telegram-каналов |
 | `KEYWORDS_JSON` | `[]` | фильтр по словам; пустой — отправлять всё |
 | `LOOKBACK_MINUTES` | `70` | окно свежести постов |
 | `MAX_POSTS_PER_CHANNEL` | `50` | максимум постов за запуск |
