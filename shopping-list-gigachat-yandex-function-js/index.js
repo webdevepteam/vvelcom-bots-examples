@@ -868,12 +868,66 @@ async function helpText(isPrivate) {
     '• Без ответа на список меняется последний подходящий.',
     '• Отметить сделанное — нажмите на пункт в списке.',
     '',
-    '/add <текст> — составить или изменить список',
-    '/list — последний список',
-    `/lists — последние ${KEEP_LISTS} списков (старые не хранятся)`,
-    '/stats — расход токенов',
-    '/help — эта справка'
+    `Кнопки ниже: последний список, история (храню ${KEEP_LISTS} последних), расход токенов.`
   ].join('\n');
+}
+
+/*
+  Меню кнопками, как у @VVbotMother: в личке — нижняя клавиатура (reply keyboard), её нажатие
+  приходит текстом; под справкой — inline-кнопки (в группе бот видит только их и команды).
+*/
+const MENU = [
+  { action: 'list', label: '📝 Последний список' },
+  { action: 'lists', label: '🗂 Мои списки' },
+  { action: 'stats', label: '📊 Статистика' },
+  { action: 'help', label: '❓ Помощь' }
+];
+const MENU_ACTIONS = new Set(['start', ...MENU.map((item) => item.action)]);
+const MENU_BY_LABEL = new Map(MENU.map((item) => [item.label, item.action]));
+
+const replyKeyboard = () => ({
+  keyboard: [[MENU[0].label, MENU[1].label], [MENU[2].label, MENU[3].label]],
+  resize_keyboard: true
+});
+
+const helpButtons = () => ({
+  inline_keyboard: [
+    [{ text: MENU[0].label, callback_data: 'c:list' }, { text: MENU[1].label, callback_data: 'c:lists' }],
+    [{ text: MENU[2].label, callback_data: 'c:stats' }]
+  ]
+});
+
+async function runMenuAction(action, chatId, isPrivate, dispatch) {
+  if (action === 'start' || action === 'help') {
+    // В личке /start ещё и ставит нижнюю клавиатуру — отдельным сообщением, у справки свои кнопки.
+    if (isPrivate && action === 'start') {
+      await send(chatId, '👋 Привет! Меню — на кнопках внизу.', { reply_markup: replyKeyboard() });
+    }
+
+    await send(chatId, await helpText(isPrivate), { reply_markup: helpButtons() });
+    return;
+  }
+
+  if (action === 'list') {
+    const list = await lastList(chatId);
+
+    if (list) {
+      await postList(list);
+    } else {
+      await send(chatId, noListsText(isPrivate));
+    }
+
+    return;
+  }
+
+  if (action === 'lists') {
+    await sendListIndex(chatId, isPrivate);
+    return;
+  }
+
+  if (action === 'stats') {
+    await (dispatch ? dispatch({ kind: 'stats', chatId }) : sendStats(chatId));
+  }
 }
 
 const noListsText = (isPrivate) => (isPrivate
@@ -974,7 +1028,8 @@ async function handleMessage(message, dispatch) {
   const chatId = message.chat.id;
   const isPrivate = message.chat.type === 'private';
   await getBotUsername();
-  const command = parseCommand(message);
+  // Кнопка нижней клавиатуры (в личке) приходит обычным текстом — это та же команда.
+  const command = parseCommand(message) || (isPrivate ? MENU_BY_LABEL.get((message.text || '').trim()) : null) || null;
 
   if (command === '__other__') {
     return;
@@ -992,34 +1047,12 @@ async function handleMessage(message, dispatch) {
     return;
   }
 
-  if (command === 'start' || command === 'help') {
-    if (command === 'start') {
-      await quietly(vv('setMyCommands', { commands: COMMANDS }));
-    }
-
-    await send(chatId, await helpText(isPrivate));
-    return;
+  if (command === 'start') {
+    await quietly(vv('setMyCommands', { commands: COMMANDS }));
   }
 
-  if (command === 'list') {
-    const list = await lastList(chatId);
-
-    if (list) {
-      await postList(list);
-    } else {
-      await send(chatId, noListsText(isPrivate));
-    }
-
-    return;
-  }
-
-  if (command === 'lists') {
-    await sendListIndex(chatId, isPrivate);
-    return;
-  }
-
-  if (command === 'stats') {
-    await dispatch({ kind: 'stats', chatId });
+  if (MENU_ACTIONS.has(command)) {
+    await runMenuAction(command, chatId, isPrivate, dispatch);
     return;
   }
 
@@ -1054,12 +1087,19 @@ async function handleMessage(message, dispatch) {
   });
 }
 
-async function handleCallback(query) {
+async function handleCallback(query, dispatch) {
   const chatId = query.message.chat.id;
   const data = query.data || '';
 
   if (!isAllowed(chatId)) {
     await vv('answerCallbackQuery', { callback_query_id: query.id, text: '🔒 Бот не работает в этом чате' });
+    return;
+  }
+
+  // Кнопки под справкой.
+  if (data.startsWith('c:') && MENU_ACTIONS.has(data.slice(2))) {
+    await vv('answerCallbackQuery', { callback_query_id: query.id });
+    await runMenuAction(data.slice(2), chatId, query.message.chat.type === 'private', dispatch);
     return;
   }
 
@@ -1116,7 +1156,7 @@ async function handleMyChatMember(update) {
   }
 
   await quietly(vv('setMyCommands', { commands: COMMANDS }));
-  await send(event.chat.id, await helpText(false));
+  await runMenuAction('help', event.chat.id, false);
 }
 
 /* ───────────── Вебхук ───────────── */
@@ -1131,7 +1171,7 @@ async function handleUpdate(update, dispatch) {
       await handleMessage(update.message, dispatch);
     }
   } else if (update.callback_query?.message) {
-    await handleCallback(update.callback_query);
+    await handleCallback(update.callback_query, dispatch);
   } else if (update.my_chat_member) {
     await handleMyChatMember(update);
   }
