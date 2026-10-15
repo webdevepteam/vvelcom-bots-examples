@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f5ff">
+  <meta name="description" content="Судоку для всей семьи: цифры, фрукты, животные, машинки и фигуры. Мини-приложение VVelcom.">
+  <title>Судоку — игра в VVelcom</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
+  <link rel="stylesheet" href="./styles.css?v=1.4.1">
+  <script async src="https://apibots.vvelcom.online/bot-platform/js/vvelcom-web-app.js" onload="window.dispatchEvent(new Event('vvelcom-sdk-ready'))"></script>
+  <script defer src="./app.js?v=1.4.1"></script>
+</head>
+<body>
+  <div class="site-glow" aria-hidden="true"></div>
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="brand" id="brand-btn" aria-label="На главную">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-text">судоку<span></span><small>мини-игра для VVelcom</small></span>
+      </button>
+      <div class="topbar-actions">
+        <span class="top-pill" id="top-pill"><span class="online-dot"></span> Играйте с улыбкой</span>
+        <button type="button" class="icon-button" id="theme-btn" title="Переключить тему" aria-label="Переключить светлую или тёмную тему">☾</button>
+        <button type="button" class="icon-button" id="help-btn" title="Правила игры" aria-label="Правила игры">?</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="home-screen" id="home-screen" aria-label="Главная страница игры">
+        <div class="hero">
+          <div class="hero-content">
+            <span class="eyebrow"><span aria-hidden="true">✦</span> ГИМНАСТИКА ДЛЯ УМА</span>
+            <h1>Немного логики.<br><span>Много радости!</span></h1>
+            <p>Собирайте судоку из цифр, весёлых зверят, фруктов, машинок и фигур. От первых шагов до настоящих головоломок!</p>
+            <div class="hero-points"><span>🌈 Ярко</span><span>🧠 Полезно</span><span>💜 Для всех</span></div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <span class="art-sparkle one">✦</span><span class="art-sparkle two">✧</span>
+            <div class="hero-mini-board">
+              <span>🍎</span><span>🍐</span><span>🍇</span><span>🍓</span>
+              <span>🍓</span><span>🍇</span><span>🍐</span><span>🍎</span>
+              <span>🍐</span><span class="art-missing">?</span><span>🍓</span><span>🍇</span>
+              <span>🍇</span><span>🍓</span><span>🍎</span><span>🍐</span>
+            </div>
+            <div class="art-sticker">ты сможешь! <span>⭐</span></div>
+          </div>
+        </div>
+
+        <div class="summary-row" aria-label="Ваши достижения">
+          <div class="summary-item"><span class="summary-icon purple">🏆</span><span><strong id="wins-stat">0</strong><small>решено головоломок</small></span></div>
+          <div class="summary-item"><span class="summary-icon coral">⏱</span><span><strong id="best-stat">—</strong><small>лучшее время</small></span></div>
+          <div class="summary-item"><span class="summary-icon mint">✨</span><span><strong>5</strong><small>уровней сложности</small></span></div>
+        </div>
+
+        <div class="continue-card hidden" id="continue-card">
+          <div class="continue-art" aria-hidden="true">↗</div>
+          <div class="continue-text"><strong>Ваше приключение ждёт!</strong><span id="continue-description">Вы начали игру</span></div>
+          <button type="button" class="button button-primary continue-button" id="continue-btn">Продолжить <span aria-hidden="true">→</span></button>
+        </div>
+
+        <div class="home-columns">
+          <div class="selection-column">
+            <div class="section-heading"><div><span class="section-step">01 / ПОЛЕ</span><h2>Какой размер выберем?</h2></div><span class="heading-emoji" aria-hidden="true">🧩</span></div>
+            <div class="size-options" id="size-options" role="group" aria-label="Размер игрового поля">
+              <button class="size-card" type="button" data-size="4"><span class="size-art size-art-4" aria-hidden="true"><i></i><i></i><i></i><i></i></span><strong>4 × 4</strong><small>Для малышей</small></button>
+              <button class="size-card" type="button" data-size="6"><span class="size-art size-art-6" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><strong>6 × 6</strong><small>Для любознательных</small></button>
+              <button class="size-card" type="button" data-size="9"><span class="size-art size-art-9" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><strong>9 × 9</strong><small>Для чемпионов</small></button>
+            </div>
+
+            <div class="section-heading heading-next"><div><span class="section-step">02 / СЛОЖНОСТЬ</span><h2>Выберите свой уровень</h2></div><span class="heading-emoji" aria-hidden="true">🚀</span></div>
+            <div class="difficulty-options" id="difficulty-options" role="group" aria-label="Выбор сложности"></div>
+          </div>
+
+          <div class="selection-column theme-column">
+            <div class="section-heading"><div><span class="section-step">03 / НАСТРОЕНИЕ</span><h2>С чем будем играть?</h2></div><span class="heading-emoji" aria-hidden="true">🎨</span></div>
+            <div class="theme-options" id="theme-options" role="group" aria-label="Вид игровых символов"></div>
+            <div class="tip-card"><span class="tip-emoji" aria-hidden="true">💡</span><div><strong>Как устроено судоку?</strong><p>В каждой строке, столбце и маленьком блоке все картинки должны быть разными. Мы подскажем, если что-то не так!</p></div></div>
+          </div>
+        </div>
+        <div class="start-area">
+          <button type="button" class="button button-primary start-button" id="start-btn">Играть <span aria-hidden="true">→</span></button>
+          <span>Без регистрации и рекламы · прогресс сохраняется на устройстве</span>
+        </div>
+      </section>
+
+      <section class="game-screen hidden" id="game-screen" aria-label="Игра судоку">
+        <div class="game-topline">
+          <button class="back-link" type="button" id="back-home"><span aria-hidden="true">←</span> К уровням</button>
+          <div class="game-top-actions"><span class="game-id" id="game-number">Головоломка #01</span><button type="button" class="pause-button" id="pause-btn" aria-label="Пауза">Ⅱ <span>Пауза</span></button></div>
+        </div>
+        <div class="game-layout">
+          <div class="game-primary">
+            <div class="game-heading"><div><span class="section-step" id="game-level-caption">УРОВЕНЬ · НОВИЧОК</span><h1 id="game-title">Собери картинку <span>✦</span></h1><p id="game-subtitle">Смотри внимательно и находи пары</p></div><div class="character-sticker" aria-hidden="true">🦊</div></div>
+            <div class="game-scorebar"><div><small>ВРЕМЯ</small><strong id="timer-text">00:00</strong></div><div><small>ОШИБКИ</small><strong><span id="mistakes-text">0</span> <span class="score-muted">∞</span></strong></div><div><small>ПОДСКАЗКИ</small><strong><span id="hints-text">3</span> <span class="score-muted">из 3</span></strong></div></div>
+            <div class="board-shell">
+              <div class="board-topline"><span id="board-progress-text">0 из 16 клеток</span><span class="board-mini-label">✨ Ты справишься!</span></div>
+              <div class="progress-track" aria-hidden="true"><div id="board-progress-fill"></div></div>
+              <div class="board-wrap" id="board-wrap"><div class="sudoku-board" id="sudoku-board" role="grid" aria-label="Игровое поле"></div><div class="board-pause-overlay hidden" id="pause-overlay"><span class="pause-emoji">☕</span><strong>Передышка!</strong><p>Игра подождёт. Продолжим, когда будете готовы.</p><button type="button" class="button button-primary" id="resume-btn">Продолжить ▶</button></div></div>
+            </div>
+            <div class="number-keypad" id="number-keypad" role="group" aria-label="Выбор цифры или картинки"></div>
+            <div class="keyboard-tip">Два быстрых нажатия по своей цифре — стереть <span class="keyboard-tip-separator">·</span> Нажмите клетку и выберите символ <span class="keyboard-tip-separator">·</span> Или <strong>удерживайте и перетащите</strong> символ прямо на клетку<span class="keyboard-desktop"> · На компьютере работают клавиши 1–9 и стрелки</span></div>
+          </div>
+          <aside class="game-sidebar">
+            <div class="tools-title"><span>Ваши помощники</span><span>🪄</span></div>
+            <div class="tools-grid">
+              <button type="button" class="tool-button" id="undo-btn"><span class="tool-symbol">↶</span><strong>Назад</strong><small>Отменить ход</small></button>
+              <button type="button" class="tool-button" id="erase-btn"><span class="tool-symbol">⌫</span><strong>Ластик</strong><small>Очистить</small></button>
+              <button type="button" class="tool-button" id="notes-btn" aria-pressed="false"><span class="tool-symbol">✎</span><strong>Заметки</strong><small id="notes-status">Выкл.</small></button>
+              <button type="button" class="tool-button" id="hint-btn"><span class="tool-symbol">💡</span><strong>Подсказка</strong><small id="hints-tool-count">Осталось 3</small></button>
+            </div>
+            <div class="notes-guide hidden" id="notes-guide" role="status"><strong>✎ Режим заметок включён</strong><p>Выберите пустую клетку и отмечайте несколько возможных символов. Они появятся мелко. Выключите заметки, чтобы поставить окончательный ответ.</p></div>
+            <div class="sidebar-note"><span>🌟</span><p><strong>Совет дня</strong>Сначала ищите, каких символов не хватает в строках и маленьких квадратиках!</p></div>
+            <button type="button" class="button button-primary share-game-button hidden" id="share-game-btn">📣 Поделиться результатом</button>
+            <button type="button" class="new-game-link restart-game-link" id="restart-game-btn">↻ Начать сначала (таймер не сбрасывается)</button>
+            <button type="button" class="new-game-link" id="new-game-btn">↻ Другая головоломка</button>
+          </aside>
+        </div>
+      </section>
+    </main>
+    <footer class="footer"><span>Сделано с 💜 для любителей головоломок</span><span>Судоку · VVelcom Web App</span></footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal-backdrop hidden" id="modal-backdrop" role="presentation">
+    <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+      <button type="button" class="dialog-close" id="dialog-close" aria-label="Закрыть">×</button>
+      <div class="dialog-illustration" id="dialog-illustration">🎉</div>
+      <h2 id="dialog-title">Поздравляем!</h2>
+      <p id="dialog-description">Отличная работа!</p>
+      <div class="win-metrics hidden" id="win-metrics"></div>
+      <div class="dialog-buttons" id="dialog-buttons"></div>
+    </section>
+  </div>
+  <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
+</body>
+</html>

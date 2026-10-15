@@ -1,0 +1,11 @@
+{
+  "name": "vvelcom-sudoku-share",
+  "version": "1.4.0",
+  "private": true,
+  "description": "Yandex Cloud Function for Sudoku mini app result sharing through VVelcom Bot API",
+  "main": "index.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {}
+}
