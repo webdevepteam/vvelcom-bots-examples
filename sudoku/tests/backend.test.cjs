@@ -124,3 +124,18 @@ test('webhook has no feed callbacks and ignores other messages', async t => {
     body:JSON.stringify({callback_query:{id:'x',from:{id:'user-123'},data:'sf1.fake'}})});
   assert.equal(r.statusCode,200);assert.equal(sent,0);
 });
+
+test('webhook: unknown text gets help with menu buttons, /name renames', async t => {
+  const old=global.fetch; const calls=[];
+  global.fetch=async(_,data)=>{calls.push(JSON.parse(data.body));return {ok:true,status:200,json:async()=>({ok:true,result:{}})};};
+  t.after(()=>{global.fetch=old});
+  const send=(text,from={id:'user-777',first_name:'Пользователь'})=>app.handler({httpMethod:'POST',queryStringParameters:{mode:'webhook'},
+    headers:{'X-Telegram-Bot-Api-Secret-Token':'valid-secret-123'},
+    body:JSON.stringify({message:{chat:{id:'c1',type:'private'},from,text}})});
+  assert.equal((await send('привет')).statusCode,200);
+  assert.match(calls[0].text,/не понял/);
+  const data=calls[0].reply_markup.inline_keyboard.flat().map(b=>b.callback_data).filter(Boolean);
+  assert.deepEqual(data,['sd:top','sd:stats','sd:name']);
+  assert.equal((await send('/name')).statusCode,200);
+  assert.match(calls[1].text,/Игрок/);
+});

@@ -199,6 +199,64 @@ function topText(board, invite) {
   if (invite) lines.push('', `Попробуй и ты 👉 ${invite}`);
   return lines.join('\n');
 }
+const HELP_UNKNOWN = '🤔 Я не понял Ваше сообщение.\n\nВот что я умею:';
+const HELP_TEXT = [
+  HELP_UNKNOWN,
+  '🎮 /play — начать игру',
+  '🏆 /top — рейтинг игроков',
+  '📊 /stats — моя статистика',
+  '✏️ /name Новое имя — сменить имя в рейтинге',
+  '',
+  'Или нажмите кнопку ниже 👇',
+].join('\n');
+function menuMarkup() {
+  const gameUrl = process.env.GAME_URL || '';
+  const rows = [];
+  if (gameUrl.startsWith('https://')) rows.push([{text: '🎮 Играть', web_app: {url: gameUrl}}]);
+  rows.push([{text: '🏆 Рейтинг', callback_data: 'sd:top'}, {text: '📊 Статистика', callback_data: 'sd:stats'}]);
+  rows.push([{text: '✏️ Сменить имя', callback_data: 'sd:name'}]);
+  return {inline_keyboard: rows};
+}
+// The platform never gives bots a real name (first_name is always the placeholder), so the
+// player's name comes from /name or the in-game form; until then it is «Игрок».
+function profileNameOf(from) {
+  const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || from.username || '';
+  return name === 'Пользователь' ? '' : name;
+}
+async function nameText(from) {
+  const mine = await stats.playerStats(String(from.id), profileNameOf(from));
+  return `✏️ Сейчас Вас зовут «${mine.name}».
+
+Чтобы сменить имя в рейтинге, отправьте: /name Новое имя
+Например: /name Алексей`;
+}
+// One reply per command, shared by typed commands and menu buttons. Returns {text, markup}.
+async function commandReply(cmd, arg, from) {
+  const userId = String(from.id);
+  const profileName = profileNameOf(from);
+  if (cmd === 'top') {
+    const board = await stats.leaderboard('all', 10, userId);
+    const text = topText(board);
+    const feedText = topText(board, BOT_LINK);
+    const shareable = !/^🏆 Рейтинг Судоку пока/.test(text);
+    return {text, markup: shareable ? {inline_keyboard: [[{text: '📣 В ленту', share_to_feed: {text: feedText}}]]} : undefined};
+  }
+  if (cmd === 'stats' || cmd === 'mystats') {
+    const mine = await stats.playerStats(userId, profileName);
+    const text = stats.statsText(mine);
+    const feedText = stats.statsText(mine, BOT_LINK);
+    const shareable = !/^📊 Пока/.test(text);
+    return {text, markup: shareable ? {inline_keyboard: [[{text: '📣 В ленту', share_to_feed: {text: feedText}}]]} : undefined};
+  }
+  if (cmd === 'name' || cmd === 'rename' || cmd === 'setname') {
+    if (!arg) return {text: await nameText(from)};
+    const name = await stats.setName(userId, profileName, arg);
+    if (!name) return {text: 'Введите имя от 1 до 24 символов, например: /name Алексей'};
+    return {text: `✅ Готово! Теперь в рейтинге Вы — «${name}».`};
+  }
+  if (cmd === 'help') return {text: HELP_TEXT.replace(HELP_UNKNOWN, '📋 Что я умею:'), markup: menuMarkup()};
+  return null;
+}
 async function webhook(event) {
   const headers = headersOf(event);
   const secret = process.env.VVELCOM_WEBHOOK_SECRET;
@@ -207,42 +265,36 @@ async function webhook(event) {
   }
   let update;
   try { update = parseBody(event); } catch { return result(400, {ok:false,code:'BAD_UPDATE'}); }
-  const message = update?.message;
-  const command = typeof message?.text === 'string' ? message.text.match(/^\/(stats|mystats|top)(?:@\S+)?(?:\s|$)/i) : null;
-  if (message?.chat?.id && message.from?.id && command) {
-    try {
-      const from = message.from;
-      const profileName = [from.first_name, from.last_name].filter(Boolean).join(' ') || from.username || '';
-      let text; let feedText;
-      if (command[1].toLowerCase() === 'top') {
-        const board = await stats.leaderboard('all', 10, String(from.id));
-        text = topText(board); feedText = topText(board, BOT_LINK);
-      } else {
-        const mine = await stats.playerStats(String(from.id), profileName);
-        text = stats.statsText(mine); feedText = stats.statsText(mine, BOT_LINK);
-      }
-      const shareable = !/^(📊 Пока|🏆 Рейтинг Судоку пока)/.test(text);
-      await callBotApi('sendMessage', {chat_id:message.chat.id, text,
-        ...(shareable ? {reply_markup: {inline_keyboard: [[{text:'📣 В ленту', share_to_feed: {text: feedText}}]]}} : {})});
-    } catch (error) {
-      console.error('stats command failure', error.name || 'Error', error.statusCode || error.code || '');
-      return result(500,{ok:false,code:'WEBHOOK_PROCESSING_FAILED'});
+  try {
+    // Menu buttons of this bot (callback_data «sd:…»); any other callback is not ours and is ignored.
+    const query = update?.callback_query;
+    if (query && typeof query.data === 'string' && /^sd:(top|stats|name)$/.test(query.data) && query.message?.chat?.id && query.from?.id) {
+      const reply = await commandReply(query.data.slice(3), '', query.from);
+      await callBotApi('answerCallbackQuery', {callback_query_id: query.id}).catch(() => {});
+      await callBotApi('sendMessage', {chat_id: query.message.chat.id, text: reply.text, ...(reply.markup ? {reply_markup: reply.markup} : {})});
+      return result(200, {ok:true});
     }
-    return result(200, {ok:true});
-  }
-  if (message?.chat?.id && typeof message?.text === 'string' && /^\/(start|play)(?:@\S+)?(?:\s|$)/i.test(message.text)) {
-    const gameUrl = process.env.GAME_URL || '';
-    const markup = gameUrl.startsWith('https://') ? {inline_keyboard: [
-      [{text:'🎮 Играть',web_app:{url:gameUrl}}],
-    ]} : undefined;
-    try {
+    const message = update?.message;
+    if (!message?.chat?.id || message.from?.is_bot) return result(200, {ok:true});
+    const text = typeof message.text === 'string' ? message.text.trim() : '';
+    if (/^\/(start|play)(?:@\S+)?(?:\s|$)/i.test(text)) {
+      const gameUrl = process.env.GAME_URL || '';
+      const markup = gameUrl.startsWith('https://') ? {inline_keyboard: [
+        [{text:'🎮 Играть',web_app:{url:gameUrl}}],
+      ]} : undefined;
       await callBotApi('sendMessage', {chat_id:message.chat.id,
         text:'🧩 Это приложение «Судоку». Для начала игры нажмите кнопку «Играть» ниже.',
         ...(markup ? {reply_markup:markup} : {})});
-    } catch (error) {
-      console.error('webhook bot API failure',error.name || 'Error',error.statusCode || 'no-http-status');
-      return result(500,{ok:false,code:'WEBHOOK_PROCESSING_FAILED'});
+      return result(200, {ok:true});
     }
+    if (!message.from?.id) return result(200, {ok:true});
+    const command = text.match(/^\/(\w+)(?:@\S+)?(?:\s+([\s\S]*))?$/);
+    const reply = command ? await commandReply(command[1].toLowerCase(), (command[2] || '').trim(), message.from) : null;
+    await callBotApi('sendMessage', {chat_id: message.chat.id, text: reply ? reply.text : HELP_TEXT,
+      reply_markup: reply ? reply.markup : menuMarkup()});
+  } catch (error) {
+    console.error('webhook failure', error.name || 'Error', error.statusCode || error.code || '');
+    return result(500,{ok:false,code:'WEBHOOK_PROCESSING_FAILED'});
   }
   return result(200, {ok:true});
 }

@@ -44,6 +44,10 @@ function cleanName(raw) {
   const name = String(raw ?? '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim();
   return Array.from(name).slice(0, 24).join('');
 }
+// «Игрок 3f9a»: four hex chars of the user id's hash, stable per player, so nameless players differ.
+function anonymousName(userId) {
+  return `Игрок ${crypto.createHash('sha256').update(String(userId)).digest('hex').slice(0, 4)}`;
+}
 function playerFile(userId) { return path.join(storageDir(), 'players', String(userId), 'player.json'); }
 
 async function readPlayer(userId) {
@@ -62,7 +66,9 @@ async function writePlayer(player) {
 /** The player's record; a new one takes the VVelcom profile name, an existing custom name is kept. */
 async function ensurePlayer(userId, profileName) {
   let player = await readPlayer(userId);
-  const fallback = cleanName(profileName) || 'Игрок';
+  const profile = cleanName(profileName);
+  // The platform hides real names from bots and sends «Пользователь»: that is not a name.
+  const fallback = !profile || profile === 'Пользователь' ? anonymousName(userId) : profile;
   if (!player) player = { id: String(userId), name: fallback, nameCustom: false, createdAt: Date.now(), games: [], bests: {} };
   else if (!player.nameCustom && player.name !== fallback) player.name = fallback;
   return player;
