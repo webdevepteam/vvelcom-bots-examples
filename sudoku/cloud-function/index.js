@@ -3,6 +3,7 @@
 // Yandex Cloud Functions, Node.js 22. Entry point: index.handler.
 // No external dependencies, no secrets in ZIP or front-end.
 const crypto = require('node:crypto');
+const stats = require('./stats');
 const puzzles = require('./puzzles.json').puzzles;
 const puzzleMap = new Map(puzzles.map((p) => [p.id, p]));
 const BOT_API = 'https://apibots.vvelcom.online';
@@ -70,7 +71,8 @@ function verifyInitData(initData, token, maxAge = 86400, now = Date.now()) {
   try { user = JSON.parse(params.get('user')); } catch { return null; }
   if (!user || (typeof user.id !== 'string' && typeof user.id !== 'number') ||
       !/^[\w-]{1,128}$/.test(String(user.id))) return null;
-  return { userId: String(user.id), queryId: params.get('query_id') || '' };
+  const name = [user.first_name, user.last_name].filter((v) => typeof v === 'string' && v).join(' ') || (typeof user.username === 'string' ? user.username : '');
+  return { userId: String(user.id), name, queryId: params.get('query_id') || '' };
 }
 function validateGame(body) {
   if (!body || typeof body !== 'object' || typeof body.puzzleId !== 'string') return null;
@@ -91,19 +93,24 @@ function formatTime(t) {
   const h = Math.floor(t / 3600);
   return h ? `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
+// Bot mention for the feed post, e.g. SUDOKU_BOT_LINK=@sudoku_vvbot (the feed turns @name into a link).
+const BOT_LINK = (process.env.SUDOKU_BOT_LINK || '@sudoku_vvbot').replace(/^(?!@)/, '@');
+function scoreOf(game) {
+  const empty = game.puzzle.givens.filter((v) => v === 0).length;
+  return stats.computeScore(game.puzzle.level, empty, game.elapsed, game.mistakes, game.hintsUsed);
+}
 function buildText(game, forFeed = false) {
   const titles = { mini: 'Новичок 🌱', junior: 'Легко 🌈', classic: 'Средне 🧠', challenge: 'Сложно 🔥', master: 'Эксперт 🏆' };
-  return [
-    '🏆 Судоку — Ваш результат!',
-    '',
+  const stats = [
     `🧩 Уровень: ${titles[game.puzzle.level]} · ${game.puzzle.size}×${game.puzzle.size}`,
     `⏱ Время: ${formatTime(game.elapsed)}`,
     `🎯 Ошибки: ${game.mistakes}`,
     `💡 Подсказки: ${game.hintsUsed} из 3`,
-    '',
-    '🎉 Отличная работа!',
-    ...(forFeed ? [] : ['📣 Нажмите кнопку ниже, чтобы поделиться результатом в ленте.']),
-  ].join('\n');
+    `🏅 Очки: ${scoreOf(game)}`,
+  ];
+  if (!forFeed) return ['🏆 Судоку — Ваш результат!', '', ...stats, '', '🎉 Отличная работа!', '📣 Нажмите кнопку ниже, чтобы поделиться результатом в ленте.'].join('\n');
+  // The feed post goes out under the player's own name, so it is written in the first person.
+  return ['🏆 Я решил(а) судоку!', '', ...stats, '', `Попробуй и ты 👉 ${BOT_LINK}`].join('\n');
 }
 async function callBotApi(method, payload) {
   const token = process.env.VVELCOM_BOT_TOKEN;
@@ -150,6 +157,48 @@ async function share(body, origin) {
     return result(502, {ok:false,code:'BOT_DELIVERY_FAILED',message:'VVelcom не принял результат. Повторите попытку из чата бота.'}, origin);
   }
 }
+async function authorized(body, origin) {
+  const token = process.env.VVELCOM_BOT_TOKEN;
+  if (!token) return { error: result(503, {ok:false,code:'NOT_CONFIGURED',message:'Токен VVELCOM_BOT_TOKEN не настроен.'}, origin) };
+  const auth = verifyInitData(body?.initData, token);
+  if (!auth) return { error: result(401, {ok:false,code:'INVALID_INIT_DATA',message:'Не удалось подтвердить вход. Откройте игру из чата бота ещё раз.'}, origin) };
+  return { auth };
+}
+async function playerAction(body, origin) {
+  const { auth, error } = await authorized(body, origin);
+  if (error) return error;
+  try {
+    if (body.action === 'record') {
+      const game = validateGame(body);
+      if (!game) return result(422, {ok:false,code:'INVALID_RESULT',message:'Результат не соответствует заданию.'}, origin);
+      const saved = await stats.recordGame(auth.userId, auth.name, game);
+      return result(200, {ok:true, ...saved}, origin);
+    }
+    if (body.action === 'rename') {
+      const name = await stats.setName(auth.userId, auth.name, body.name);
+      if (!name) return result(422, {ok:false,code:'INVALID_NAME',message:'Введите имя от 1 до 24 символов.'}, origin);
+      return result(200, {ok:true, name}, origin);
+    }
+    if (body.action === 'leaderboard') {
+      const level = stats.LEVELS.includes(body.level) ? body.level : 'all';
+      const [board, me] = await Promise.all([stats.leaderboard(level, 10, auth.userId), stats.playerStats(auth.userId, auth.name)]);
+      return result(200, {ok:true, board, me}, origin);
+    }
+    return result(400, {ok:false,code:'UNKNOWN_ACTION',message:'Неизвестное действие.'}, origin);
+  } catch (e) {
+    console.error('stats failure', e.name || 'Error', e.code || '');
+    return result(500, {ok:false,code:'STORAGE_UNAVAILABLE',message:'Рейтинг сейчас недоступен. Попробуйте позже.'}, origin);
+  }
+}
+function topText(board, invite) {
+  if (!board.top.length) return '🏆 Рейтинг Судоку пока пуст. Сыграйте первую партию!';
+  const medals = ['🥇', '🥈', '🥉'];
+  const lines = ['🏆 Рейтинг Судоку', ''];
+  board.top.forEach((r) => lines.push(`${medals[r.place - 1] || `${r.place}.`} ${r.name} — ${r.value}`));
+  if (board.me && board.me.place > board.top.length) lines.push('…', `${board.me.place}. Я — ${board.me.value}`);
+  if (invite) lines.push('', `Попробуй и ты 👉 ${invite}`);
+  return lines.join('\n');
+}
 async function webhook(event) {
   const headers = headersOf(event);
   const secret = process.env.VVELCOM_WEBHOOK_SECRET;
@@ -159,6 +208,28 @@ async function webhook(event) {
   let update;
   try { update = parseBody(event); } catch { return result(400, {ok:false,code:'BAD_UPDATE'}); }
   const message = update?.message;
+  const command = typeof message?.text === 'string' ? message.text.match(/^\/(stats|mystats|top)(?:@\S+)?(?:\s|$)/i) : null;
+  if (message?.chat?.id && message.from?.id && command) {
+    try {
+      const from = message.from;
+      const profileName = [from.first_name, from.last_name].filter(Boolean).join(' ') || from.username || '';
+      let text; let feedText;
+      if (command[1].toLowerCase() === 'top') {
+        const board = await stats.leaderboard('all', 10, String(from.id));
+        text = topText(board); feedText = topText(board, BOT_LINK);
+      } else {
+        const mine = await stats.playerStats(String(from.id), profileName);
+        text = stats.statsText(mine); feedText = stats.statsText(mine, BOT_LINK);
+      }
+      const shareable = !/^(📊 Пока|🏆 Рейтинг Судоку пока)/.test(text);
+      await callBotApi('sendMessage', {chat_id:message.chat.id, text,
+        ...(shareable ? {reply_markup: {inline_keyboard: [[{text:'📣 В ленту', share_to_feed: {text: feedText}}]]}} : {})});
+    } catch (error) {
+      console.error('stats command failure', error.name || 'Error', error.statusCode || error.code || '');
+      return result(500,{ok:false,code:'WEBHOOK_PROCESSING_FAILED'});
+    }
+    return result(200, {ok:true});
+  }
   if (message?.chat?.id && typeof message?.text === 'string' && /^\/(start|play)(?:@\S+)?(?:\s|$)/i.test(message.text)) {
     const gameUrl = process.env.GAME_URL || '';
     const markup = gameUrl.startsWith('https://') ? {inline_keyboard: [
@@ -191,8 +262,8 @@ async function handler(event = {}) {
   if (method !== 'POST') return result(405, { ok: false, code: 'METHOD_NOT_ALLOWED' }, origin);
   let body;
   try { body = parseBody(event); } catch { return result(400, { ok: false, code: 'INVALID_JSON', message: 'Неверный формат запроса.' }, origin); }
-  if (body?.action !== 'share') return result(400, { ok: false, code: 'UNKNOWN_ACTION', message: 'Неизвестное действие.' }, origin);
-  return share(body, origin);
+  if (body?.action === 'share') return share(body, origin);
+  return playerAction(body, origin);
 }
 
-module.exports = { handler, verifyInitData, validateGame, buildText };
+module.exports = { handler, verifyInitData, validateGame, buildText, topText };

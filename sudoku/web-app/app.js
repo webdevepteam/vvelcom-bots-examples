@@ -204,6 +204,9 @@
     return Math.floor(a / n) === Math.floor(b / n) || a % n === b % n || getBox(a) === getBox(b);
   }
   function isEditable(i) { return i >= 0 && !game.puzzle.givens[i] && !game.revealedHints.includes(i); }
+  // «Сложно» and «Эксперт» play without help: no hints, no red cells, no same-symbol highlight,
+  // no «symbol is used up» dimming. Mistakes are still counted for the result.
+  const isHardGame = () => Boolean(game) && ['challenge', 'master'].includes(game.puzzle.level);
   function renderGame() {
     if (!game) return;
     const p = game.puzzle; const lvl = LEVELS[p.level];
@@ -219,6 +222,9 @@
     $('#hints-text').textContent = String(game.hints);
     $('#hints-tool-count').textContent = `Осталось ${game.hints}`;
     $('#hint-btn').disabled = !game.hints || game.paused || game.finished;
+    $('#hint-btn').classList.toggle('hidden', isHardGame());
+    $('#hints-text').closest('div')?.classList.toggle('hidden', isHardGame());
+    $('#mistakes-text').closest('div')?.classList.toggle('hidden', isHardGame());
     $('#notes-btn').classList.toggle('active', !!game.notesMode);
     $('#notes-btn').setAttribute('aria-pressed', String(!!game.notesMode));
     $('#notes-status').textContent = game.notesMode ? 'Включены' : 'Выкл.';
@@ -228,7 +234,8 @@
     $('#notes-btn').disabled = game.paused || game.finished;
     $('#pause-btn').disabled = game.finished;
     $('#share-game-btn').classList.toggle('hidden', !game.finished);
-    const correctCount = game.board.filter((v, i) => v === p.solution[i]).length;
+    // In the no-help levels progress counts filled cells, so it can't reveal a wrong one.
+    const correctCount = game.board.filter((v, i) => (isHardGame() ? v !== 0 : v === p.solution[i])).length;
     $('#board-progress-text').textContent = `${correctCount} из ${p.size * p.size} клеток`;
     $('#board-progress-fill').style.width = `${correctCount * 100 / p.solution.length}%`;
     renderBoard(); renderKeypad();
@@ -248,13 +255,13 @@
       if (revealed) b.classList.add('is-hint');
       if (i === game.selected) b.classList.add('is-selected');
       else if (game.selected >= 0 && isPeer(game.selected, i)) b.classList.add('is-peer');
-      if (v && game.selected >= 0 && game.board[game.selected] === v && i !== game.selected) b.classList.add('is-match');
-      if (v && v !== p.solution[i]) b.classList.add('is-wrong');
+      if (!isHardGame() && v && game.selected >= 0 && game.board[game.selected] === v && i !== game.selected) b.classList.add('is-match');
+      if (!isHardGame() && v && v !== p.solution[i]) b.classList.add('is-wrong');
       if ((col + 1) % p.boxCols === 0 && col !== n - 1) b.classList.add('cell-box-end');
       if ((row + 1) % p.boxRows === 0 && row !== n - 1) b.classList.add('cell-row-end');
       if (col === n - 1) b.classList.add('cell-last-col');
       if (row === n - 1) b.classList.add('cell-last-row');
-      b.setAttribute('aria-label', `Строка ${row + 1}, столбец ${col + 1}: ${v ? symbol(v, game.skin) : 'пусто'}${fixed ? ', задано' : ''}${v && v !== p.solution[i] ? ', ошибка' : ''}`);
+      b.setAttribute('aria-label', `Строка ${row + 1}, столбец ${col + 1}: ${v ? symbol(v, game.skin) : 'пусто'}${fixed ? ', задано' : ''}${!isHardGame() && v && v !== p.solution[i] ? ', ошибка' : ''}`);
       b.setAttribute('aria-selected', String(i === game.selected));
       if (v) b.append(tokenNode(v, game.skin));
       else if (game.notes[i].length) {
@@ -278,7 +285,7 @@
       const b = document.createElement('button');b.type = 'button';b.className = 'key-button';b.title = `Поставить ${symbol(v, game.skin)} (клавиша ${v})`;
       b.setAttribute('aria-label', `Поставить ${symbol(v, game.skin)}`);
       b.append(tokenNode(v, game.skin)); b.disabled = game.paused || game.finished;
-      if (game.board.filter((x, i) => x === v && x === game.puzzle.solution[i]).length === n) b.classList.add('is-complete');
+      if (!isHardGame() && game.board.filter((x, i) => x === v && x === game.puzzle.solution[i]).length === n) b.classList.add('is-complete');
       b.addEventListener('pointerdown', (event) => prepareKeyDrag(event, v, b));
       b.addEventListener('click', () => {
         if (suppressKeyClick && suppressKeyClick.value === v && Date.now() - suppressKeyClick.time < 900) return;
@@ -440,7 +447,8 @@
     if (game.board[i] === value && !game.notes[i].length) return;
     snapshot(); game.board[i] = value; game.notes[i] = [];
     if (value !== game.puzzle.solution[i]) {
-      game.mistakes++; vib('error'); showToast('Ой! Тут другой символ. Попробуйте ещё 💜', true);
+      game.mistakes++;
+      if (!isHardGame()) { vib('error'); showToast('Ой! Тут другой символ. Попробуйте ещё 💜', true); }
     } else {
       vib(); for (let k = 0; k < game.board.length; k++) if (isPeer(i, k)) game.notes[k] = game.notes[k].filter((v) => v !== value);
     }
@@ -465,7 +473,7 @@
   }
   function giveHint() {
     resetCellTap();
-    if (!game || game.paused || game.finished || game.hints <= 0) return;
+    if (!game || game.paused || game.finished || game.hints <= 0 || isHardGame()) return;
     let i = game.selected;
     if (!isEditable(i) || game.board[i] === game.puzzle.solution[i]) i = game.board.findIndex((v, k) => isEditable(k) && v !== game.puzzle.solution[k]);
     if (i === -1) return showToast('Все клетки уже на своих местах!');
@@ -484,6 +492,7 @@
     if (!stats.completed.includes(game.puzzle.id)) stats.completed.push(game.puzzle.id);
     if (!Number.isInteger(stats.bestPerLevel[game.puzzle.level]) || game.elapsed < stats.bestPerLevel[game.puzzle.level]) stats.bestPerLevel[game.puzzle.level] = game.elapsed;
     vib('success'); renderGame(); saveProfile(); createConfetti(); showWinDialog();
+    void recordResult(game);
   }
   function createConfetti() {
     const layer = $('#confetti-layer');layer.replaceChildren();const colors = ['#6c4fe3', '#ffb63b', '#fe6d9a', '#48cfa9', '#78b8ff'];
@@ -500,6 +509,54 @@
     const lvl = LEVELS[game.puzzle.level];
     openDialog({ kind: 'win', art: '🏆', title: 'Ура, получилось!', text: `Головоломка «${lvl.label}» решена! Вы отлично справились. Новые приключения ждут!`, metrics: true,
       actions: [{ label: '📣 Поделиться результатом', primary: true, fn: shareResult }, { label: 'Следующая головоломка →', fn: () => startNewGame(game.puzzle.level) }, { label: 'К выбору уровня', fn: showHome }] });
+  }
+  // Rating: the result goes to the Yandex function, which stores it under the player's VVelcom id.
+  async function callApi(payload, timeout = 10000) {
+    const initData = sdk?.initData || '';
+    if (!backendUrl || !initData) return null;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(backendUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, initData }), signal: controller.signal });
+      const data = await response.json();
+      return response.ok && data.ok ? data : null;
+    } catch { return null; } finally { clearTimeout(timer); }
+  }
+  async function recordResult(g) {
+    const data = await callApi({ action: 'record', puzzleId: g.puzzle.id, board: g.board.slice(), elapsed: g.elapsed, mistakes: g.mistakes, hintsUsed: 3 - g.hints });
+    if (!data || dialogState !== 'win') return;
+    const place = data.place ? ` · ${data.place}-е место из ${data.total}` : '';
+    $('#dialog-description').textContent = `Головоломка «${LEVELS[g.puzzle.level].label}» решена!\n🏅 Очки: ${data.score}${data.newBest ? ' — новый личный рекорд!' : ''}\nРейтинг: ${data.rating}${place}`;
+  }
+  const BOARD_LEVELS = ['all', 'mini', 'junior', 'classic', 'challenge', 'master'];
+  const medal = (place) => ['🥇', '🥈', '🥉'][place - 1] || `${place}.`;
+  async function showLeaderboard(level = 'all') {
+    if (!sdk?.initData || !backendUrl) { showToast('Рейтинг доступен при запуске из VVelcom', true); return; }
+    showToast('Загружаем рейтинг…');
+    const data = await callApi({ action: 'leaderboard', level });
+    if (!data) { showToast('Рейтинг сейчас недоступен', true); return; }
+    const { board, me } = data;
+    const lines = board.top.length ? board.top.map((r) => `${medal(r.place)} ${r.name}${r.me ? ' (вы)' : ''} — ${r.value}`) : ['Пока никто не играл. Станьте первым!'];
+    if (board.me && board.me.place > board.top.length) lines.push('…', `${board.me.place}. Вы — ${board.me.value}`);
+    if (level === 'all' && me?.games) {
+      lines.push('', `Ваша статистика: партий ${me.games}, среднее время ${formatTime(me.avgTime)},`, `ошибок в среднем ${me.avgMistakes}, без ошибок и подсказок: ${me.flawless}`);
+    }
+    const next = BOARD_LEVELS[(BOARD_LEVELS.indexOf(level) + 1) % BOARD_LEVELS.length];
+    const title = level === 'all' ? 'Общий рейтинг' : `Рейтинг · ${LEVELS[level].label}`;
+    openDialog({ kind: 'rating', art: '🏅', title, text: lines.join('\n'), keepTimerRunning: true,
+      actions: [{ label: next === 'all' ? 'Общий рейтинг' : `Уровень: ${LEVELS[next].label}`, primary: true, fn: () => { closeDialog(); void showLeaderboard(next); } },
+        { label: `Имя в рейтинге: ${me?.name || 'изменить'}`, fn: () => { closeDialog(); askName(me?.name || ''); } }] });
+    $('#dialog-description').classList.toggle('rating-list', true);
+  }
+  function askName(current) {
+    openDialog({ kind: 'rename', art: '✏️', title: 'Как вас показывать?', text: 'Имя увидят другие игроки в рейтинге (до 24 символов).', keepTimerRunning: true, input: current,
+      actions: [{ label: 'Сохранить', primary: true, fn: async () => {
+        const name = $('#dialog-input').value.trim();
+        if (!name) { showToast('Введите имя', true); return; }
+        const data = await callApi({ action: 'rename', name });
+        closeDialog();
+        if (data) { showToast('Имя сохранено'); void showLeaderboard('all'); } else showToast('Не удалось сохранить имя', true);
+      } }, { label: 'Отмена', fn: closeDialog }] });
   }
   function resultText() {
     return `🎉 Головоломка судоку в VVelcom решена! 🧩\nУровень: ${LEVELS[game.puzzle.level].label} (${game.puzzle.size}×${game.puzzle.size})\nВремя: ${formatTime(game.elapsed)} · Ошибки: ${game.mistakes}\nИграй тоже в «Судоку Лэнд»!`;
@@ -571,13 +628,14 @@
     const el = $('#toast'); el.textContent = message; el.classList.toggle('error', error); el.classList.add('visible');
     clearTimeout(toastTimer);toastTimer = setTimeout(() => el.classList.remove('visible'), 2200);
   }
-  function openDialog({ kind, art, title, text, actions, metrics = false, keepTimerRunning = false }) {
+  function openDialog({ kind, art, title, text, actions, metrics = false, keepTimerRunning = false, input = null }) {
     dialogState = kind;
     dialogPausedGame = !keepTimerRunning && !!(game && page === 'game' && !game.paused && !game.finished);
     if (dialogPausedGame) { game.paused = true; renderGame(); }
     $('#dialog-illustration').textContent = art;
     $('#dialog-title').textContent = title;
     $('#dialog-description').textContent = text;
+    const field = $('#dialog-input'); field.classList.toggle('hidden', input === null); if (input !== null) field.value = input;
     const metric = $('#win-metrics');metric.classList.toggle('hidden', !metrics);
     if (metrics && game) {
       metric.replaceChildren();
@@ -662,6 +720,7 @@
     $('#brand-btn').addEventListener('click', showHome);
     $('#theme-btn').addEventListener('click', () => { preferences.theme = preferences.theme === 'dark' ? 'light' : 'dark';applyTheme();saveProfile(); });
     $('#help-btn').addEventListener('click', showRules);
+    $('#rating-btn').addEventListener('click', () => void showLeaderboard('all'));
     $$('.size-card').forEach((b) => b.addEventListener('click', () => selectSize(Number(b.dataset.size))));
     $('#start-btn').addEventListener('click', () => startNewGame());
     $('#continue-btn').addEventListener('click', showGame);

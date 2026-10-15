@@ -31,9 +31,9 @@ html {
    VVelcom's WebApp bridge or ?embedded=1 enables the guarded fallback. */
 body.is-embedded .app-shell {
   padding-top: max(calc(var(--host-top-clearance) + env(safe-area-inset-top, 0px)), calc(var(--tg-content-safe-area-inset-top, 0px) + 14px));
-  padding-bottom: calc(44px + var(--host-bottom-clearance) + var(--safe-bottom));
+  padding-bottom: calc(12px + var(--safe-bottom));
 }
-body.is-embedded .footer { padding-bottom: calc(20px + var(--safe-bottom)); }
+body.is-embedded .footer { padding-bottom: calc(8px + var(--safe-bottom)); margin-top: 18px; }
 body.is-embedded .toast { bottom: calc(28px + var(--host-bottom-clearance) + var(--safe-bottom)); }
 body.is-embedded .modal-backdrop {
   padding-top: calc(20px + var(--host-top-clearance) + var(--safe-top));
@@ -105,3 +105,6 @@ body.is-dragging-symbol .sudoku-board .cell { transition: background-color .09s,
 .theme-dark .notes-guide p { color:#eee2ff; }
 .restart-game-link { display:block; width:100%; margin:8px 0; border:1px solid var(--border); background:var(--card); border-radius:14px; padding:13px 9px; text-align:center; color:var(--text); font-weight:750; font-size:13px; }
 .restart-game-link:active { transform:scale(.99); }
+#dialog-description { white-space: pre-line; }
+.dialog-input { width: 100%; margin: 0 0 16px; padding: 13px 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--card); color: var(--text); font: inherit; font-weight: 700; text-align: center; }
+.dialog-input:focus { outline: none; border-color: var(--purple); }
