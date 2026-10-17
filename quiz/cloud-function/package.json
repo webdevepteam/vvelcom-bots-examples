@@ -1,0 +1,11 @@
+{
+  "name": "vvelcom-quiz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Yandex Cloud Function for the Quiz mini app: results, rating, group rounds and chat commands through VVelcom Bot API",
+  "main": "index.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {}
+}

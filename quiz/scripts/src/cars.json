@@ -1,0 +1,1602 @@
+[
+  [
+    1,
+    "Какая компания выпускает модель «Camry»?",
+    "Toyota",
+    "Honda",
+    "Nissan",
+    "Mazda"
+  ],
+  [
+    1,
+    "Из какой страны родом марка Ferrari?",
+    "Италия",
+    "Франция",
+    "Германия",
+    "Великобритания"
+  ],
+  [
+    1,
+    "Какая марка использует эмблему из четырёх переплетённых колец?",
+    "Audi",
+    "BMW",
+    "Mercedes-Benz",
+    "Volkswagen"
+  ],
+  [
+    1,
+    "Какой завод выпускает автомобили «Лада»?",
+    "АвтоВАЗ",
+    "ГАЗ",
+    "УАЗ",
+    "КамАЗ"
+  ],
+  [
+    1,
+    "Как называется прибор, показывающий скорость автомобиля?",
+    "Спидометр",
+    "Тахометр",
+    "Одометр",
+    "Барометр"
+  ],
+  [
+    1,
+    "Какое животное изображено на эмблеме Peugeot?",
+    "Лев",
+    "Конь",
+    "Бык",
+    "Орёл"
+  ],
+  [
+    1,
+    "Какое животное изображено на эмблеме Lamborghini?",
+    "Бык",
+    "Конь",
+    "Ягуар",
+    "Змея"
+  ],
+  [
+    1,
+    "В какой стране находится главный офис Volkswagen?",
+    "Германия",
+    "США",
+    "Швеция",
+    "Япония"
+  ],
+  [
+    1,
+    "Какая компания выпускает спорткар «Mustang»?",
+    "Ford",
+    "Chevrolet",
+    "Dodge",
+    "Tesla"
+  ],
+  [
+    1,
+    "Какая компания создала электромобили Model S и Model 3?",
+    "Tesla",
+    "Rivian",
+    "Lucid",
+    "Nio"
+  ],
+  [
+    1,
+    "Какая марка выпускает модель Golf?",
+    "Volkswagen",
+    "Opel",
+    "Skoda",
+    "Renault"
+  ],
+  [
+    1,
+    "Что означает слово «кабриолет»?",
+    "Автомобиль со складной или съёмной крышей",
+    "Автомобиль с шестью дверями",
+    "Грузовой фургон",
+    "Гоночная машина"
+  ],
+  [
+    1,
+    "Из какой страны родом марка Toyota?",
+    "Япония",
+    "Китай",
+    "Южная Корея",
+    "Тайвань"
+  ],
+  [
+    1,
+    "Какая марка использует эмблему в виде трёхлучевой звезды в круге?",
+    "Mercedes-Benz",
+    "Mitsubishi",
+    "Citroën",
+    "Suzuki"
+  ],
+  [
+    1,
+    "Как называется кузов автомобиля с тремя объёмами: капот, салон и багажник?",
+    "Седан",
+    "Хэтчбек",
+    "Пикап",
+    "Минивэн"
+  ],
+  [
+    2,
+    "В каком городе находится штаб-квартира BMW?",
+    "Мюнхен",
+    "Штутгарт",
+    "Берлин",
+    "Ингольштадт"
+  ],
+  [
+    2,
+    "Какая из этих марок входит в концерн Volkswagen Group?",
+    "Skoda",
+    "Renault",
+    "Fiat",
+    "Kia"
+  ],
+  [
+    2,
+    "Что означает аббревиатура ABS в автомобиле?",
+    "Антиблокировочная тормозная система",
+    "Автоматическая блокировка сцепления",
+    "Адаптивная система стабилизации",
+    "Аварийная подача топлива"
+  ],
+  [
+    2,
+    "В какой стране основана компания Volvo?",
+    "Швеция",
+    "Норвегия",
+    "Дания",
+    "Финляндия"
+  ],
+  [
+    2,
+    "Как называется первая модель Ford, которую с 1908 года собирали большими сериями?",
+    "Model T",
+    "Model A",
+    "Mustang",
+    "Thunderbird"
+  ],
+  [
+    2,
+    "В каком городе выпускали «Запорожец»?",
+    "Запорожье",
+    "Харьков",
+    "Днепр",
+    "Одесса"
+  ],
+  [
+    2,
+    "Сколько цилиндров у двигателя V8?",
+    "8",
+    "4",
+    "6",
+    "12"
+  ],
+  [
+    2,
+    "Кто основал компанию Ford?",
+    "Генри Форд",
+    "Карл Бенц",
+    "Фердинанд Порше",
+    "Этторе Бугатти"
+  ],
+  [
+    2,
+    "Какой тип привода был у классических «Жигулей» ВАЗ-2101?",
+    "Задний",
+    "Передний",
+    "Полный",
+    "Подключаемый полный"
+  ],
+  [
+    2,
+    "Как называется спорткар Chevrolet, который выпускают с 1953 года?",
+    "Corvette",
+    "Camaro",
+    "Impala",
+    "Malibu"
+  ],
+  [
+    2,
+    "Что измеряет тахометр?",
+    "Обороты двигателя",
+    "Скорость автомобиля",
+    "Пробег",
+    "Температуру масла"
+  ],
+  [
+    2,
+    "В какой стране основана марка Skoda?",
+    "Чехия",
+    "Польша",
+    "Германия",
+    "Австрия"
+  ],
+  [
+    2,
+    "Что означает тип кузова SUV?",
+    "Спортивно-утилитарный автомобиль (внедорожник)",
+    "Супер-универсальный вагон",
+    "Седан с увеличенным багажником",
+    "Скоростной городской электромобиль"
+  ],
+  [
+    2,
+    "Какая марка выпускает модель Civic?",
+    "Honda",
+    "Toyota",
+    "Mazda",
+    "Subaru"
+  ],
+  [
+    2,
+    "Какая компания выпускает гибрид Prius?",
+    "Toyota",
+    "Honda",
+    "Nissan",
+    "Hyundai"
+  ],
+  [
+    3,
+    "Кто получил патент на первый автомобиль с двигателем внутреннего сгорания в 1886 году?",
+    "Карл Бенц",
+    "Готлиб Даймлер",
+    "Рудольф Дизель",
+    "Николаус Отто"
+  ],
+  [
+    3,
+    "Кто разработал конструкцию «Жука» — Volkswagen Käfer?",
+    "Фердинанд Порше",
+    "Энцо Феррари",
+    "Генри Форд",
+    "Этторе Бугатти"
+  ],
+  [
+    3,
+    "В каком году основана компания Tesla Motors?",
+    "2003",
+    "2008",
+    "1998",
+    "2010"
+  ],
+  [
+    3,
+    "На каком заводе выпускали «Победу» (М-20)?",
+    "ГАЗ",
+    "ЗИЛ",
+    "«Москвич»",
+    "АЗЛК"
+  ],
+  [
+    3,
+    "Какой двигатель стоял на Mazda RX-7?",
+    "Роторный (Ванкеля)",
+    "V6",
+    "Дизельный",
+    "Электрический"
+  ],
+  [
+    3,
+    "Какая гонка проходит на трассе «Сарта» во Франции?",
+    "24 часа Ле-Мана",
+    "Гран-при Монако",
+    "Ралли «Дакар»",
+    "Mille Miglia"
+  ],
+  [
+    3,
+    "В какой стране находится Молсайм, где была основана компания Bugatti?",
+    "Франция",
+    "Италия",
+    "Германия",
+    "Швейцария"
+  ],
+  [
+    3,
+    "Что означает аббревиатура VIN?",
+    "Идентификационный номер транспортного средства",
+    "Номер двигателя",
+    "Регистрационный знак",
+    "Код ключа зажигания"
+  ],
+  [
+    3,
+    "Какой индийский концерн с 2008 года владеет Jaguar и Land Rover?",
+    "Tata Motors",
+    "Mahindra",
+    "Maruti Suzuki",
+    "Bajaj"
+  ],
+  [
+    3,
+    "Какой автомобиль в народе называли «горбатым»?",
+    "ЗАЗ-965 «Запорожец»",
+    "ВАЗ-2101",
+    "ГАЗ-21 «Волга»",
+    "«Москвич-408»"
+  ],
+  [
+    3,
+    "Кто изобрёл дизельный двигатель?",
+    "Рудольф Дизель",
+    "Готлиб Даймлер",
+    "Николаус Отто",
+    "Вильгельм Майбах"
+  ],
+  [
+    3,
+    "Где традиционно расположен двигатель у Porsche 911?",
+    "Сзади",
+    "Спереди",
+    "В центре",
+    "Над передней осью"
+  ],
+  [
+    3,
+    "Какой автоконцерн возник в 1998 году после слияния Daimler-Benz и Chrysler?",
+    "DaimlerChrysler",
+    "Stellantis",
+    "Fiat Chrysler",
+    "Renault-Nissan"
+  ],
+  [
+    3,
+    "Где находился завод, на котором собирали DeLorean DMC-12?",
+    "Северная Ирландия (Великобритания)",
+    "США",
+    "Канада",
+    "Республика Ирландия"
+  ],
+  [
+    3,
+    "Сколько цилиндров у двигателя Bugatti Veyron?",
+    "16",
+    "12",
+    "10",
+    "8"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Ford Model T»?",
+    "Ford",
+    "Ламборгини",
+    "Mitsubishi Motors",
+    "Honda"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Citroën 2CV»?",
+    "Citroën",
+    "Škoda Auto",
+    "Jaguar",
+    "Tesla, Inc."
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Tata Nano»?",
+    "Tata Motors",
+    "Renault",
+    "Subaru",
+    "Audi"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Tesla Cybertruck»?",
+    "Tesla, Inc.",
+    "Citroën",
+    "Stellantis North America",
+    "Rolls-Royce Motor Cars"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Lamborghini Aventador»?",
+    "Ламборгини",
+    "Cadillac",
+    "Maybach",
+    "Fiat Group"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Renault Sandero»?",
+    "Renault",
+    "Karmann",
+    "Talbot",
+    "Lotus Cars"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Lamborghini Murciélago»?",
+    "Ламборгини",
+    "Plymouth",
+    "SEAT",
+    "Pininfarina"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Tesla Model 3»?",
+    "Tesla, Inc.",
+    "Simca",
+    "Renault",
+    "Cadillac"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Mini»?",
+    "British Motor Corporation",
+    "Застава",
+    "Honda",
+    "Toyota"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Toyota Yaris»?",
+    "Toyota",
+    "Ford Germany",
+    "Ульяновский автомобильный завод",
+    "Карл Бенц"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Toyota Land Cruiser»?",
+    "Toyota",
+    "Daihatsu",
+    "McLaren",
+    "Rolls-Royce Motor Cars"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Toyota Supra»?",
+    "Toyota",
+    "Bugatti Automobili",
+    "HWA AG",
+    "Fiat Group"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Автомобиль Бенца»?",
+    "Карл Бенц",
+    "Fiat Group",
+    "Hyundai Motor",
+    "Renault"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Tesla Roadster»?",
+    "Tesla, Inc.",
+    "Mazda",
+    "Aston Martin",
+    "Ламборгини"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Toyota RAV4»?",
+    "Toyota",
+    "Bugatti",
+    "Tata Motors",
+    "Daihatsu"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Audi R8»?",
+    "Audi",
+    "General Motors",
+    "Pagani Automobili",
+    "Ульяновский автомобильный завод"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Lamborghini Gallardo»?",
+    "Ламборгини",
+    "Talbot",
+    "Suzuki Motor Corporation",
+    "Fiat"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Nissan LEAF»?",
+    "Nissan",
+    "Plymouth",
+    "Ford of Britain",
+    "Subaru"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Škoda Octavia»?",
+    "Škoda Auto",
+    "Saab Automobile AB",
+    "McLaren",
+    "Talbot"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Peugeot 206»?",
+    "Peugeot",
+    "Stellantis Europe",
+    "Cadillac",
+    "Ford do Brasil"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Peugeot 205»?",
+    "Peugeot",
+    "Ford of Britain",
+    "Ульяновский автомобильный завод",
+    "Горьковский автомобильный завод"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Mercedes-Benz SLR McLaren»?",
+    "Mercedes-Benz Group",
+    "GM Korea",
+    "BMW",
+    "АвтоВАЗ"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Audi Q7»?",
+    "Audi",
+    "Iso",
+    "Alfa Romeo",
+    "Škoda Auto"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Nissan GT-R»?",
+    "Nissan",
+    "Land Rover",
+    "АвтоВАЗ",
+    "Mercedes-Benz Vans"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «BMW M3»?",
+    "BMW",
+    "Citroën",
+    "Ferrari",
+    "HWA AG"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Ferrari F40»?",
+    "Ferrari",
+    "Dacia",
+    "General Motors",
+    "Audi"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Lamborghini Diablo»?",
+    "Ламборгини",
+    "Karmann",
+    "Bentley Motors",
+    "Ford Germany"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Lamborghini Urus»?",
+    "Ламборгини",
+    "Volkswagen Autoeuropa",
+    "Karmann",
+    "Stellantis North America"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Audi A8»?",
+    "Audi",
+    "McLaren",
+    "Autobianchi",
+    "Rolls-Royce Motor Cars"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Fiat Nuova 500»?",
+    "Fiat",
+    "Bentley Motors",
+    "Карл Бенц",
+    "Volvo Cars"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Ferrari 458 Italia»?",
+    "Ferrari",
+    "Honda",
+    "Karmann",
+    "McLaren"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Ferrari F430»?",
+    "Ferrari",
+    "Land Rover",
+    "Opel",
+    "Dacia"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Tesla Model X»?",
+    "Tesla, Inc.",
+    "Kia Motors",
+    "Mitsubishi Motors",
+    "Nissan"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «BMW i3 (2013)»?",
+    "BMW",
+    "Lancia",
+    "Toyota",
+    "Honda"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Hyundai Tucson»?",
+    "Hyundai Motor",
+    "Jeep",
+    "Toyota",
+    "Lancia"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Audi TT»?",
+    "Audi",
+    "British Motor Corporation",
+    "Koenigsegg",
+    "Volvo Cars"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Ford Mondeo»?",
+    "Ford of Europe",
+    "Alfa Romeo",
+    "Stellantis North America",
+    "Maserati"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Peugeot 308»?",
+    "Peugeot",
+    "Porsche",
+    "McLaren",
+    "Audi"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Lada Niva Legend»?",
+    "АвтоВАЗ",
+    "Dacia",
+    "Aston Martin",
+    "Mitsubishi Motors"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Renault Logan»?",
+    "Dacia",
+    "Mazda",
+    "Dodge",
+    "Volkswagen"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Toyota Aygo»?",
+    "Toyota",
+    "Dodge",
+    "Porsche",
+    "Pininfarina"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «BMW X5»?",
+    "BMW",
+    "British Motor Corporation",
+    "Lotus Cars",
+    "McLaren"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Porsche 918»?",
+    "Porsche",
+    "BMW M",
+    "Lancia",
+    "Daimler-Benz"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Renault 4»?",
+    "Renault",
+    "Bugatti",
+    "Карл Бенц",
+    "Mercedes-Benz Vans"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Citroën C1»?",
+    "Peugeot",
+    "АвтоВАЗ",
+    "British Motor Corporation",
+    "Mazda"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Lamborghini Countach»?",
+    "Ламборгини",
+    "Karmann",
+    "Opel",
+    "Peel Engineering Company"
+  ],
+  [
+    1,
+    "Под маркой какой компании вышел автомобиль «Peugeot 307»?",
+    "Peugeot",
+    "Groupe PSA",
+    "Mitsubishi Motors",
+    "Ford"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «BMW X3»?",
+    "BMW",
+    "Hyundai Motor",
+    "Renault",
+    "McLaren"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Ferrari California»?",
+    "Ferrari",
+    "АвтоВАЗ",
+    "Shelby Super Cars",
+    "Rolls-Royce Motor Cars"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Honda Jazz»?",
+    "Honda",
+    "Bugatti Automobili",
+    "Fiat",
+    "Suzuki Motor Corporation"
+  ],
+  [
+    1,
+    "К какому автопроизводителю относится модель «Škoda Yeti»?",
+    "Škoda Auto",
+    "HWA AG",
+    "Tesla, Inc.",
+    "Suzuki Motor Corporation"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Audi A2»?",
+    "Audi",
+    "Peel Engineering Company",
+    "Tesla, Inc.",
+    "Ford of Europe"
+  ],
+  [
+    1,
+    "Какая компания выпускала или выпускает модель «Audi A5»?",
+    "Audi",
+    "Maserati",
+    "Opel",
+    "Fiat Group"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Mazda RX-8»?",
+    "Mazda",
+    "Maserati",
+    "Renault",
+    "Land Rover"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Subaru Impreza»?",
+    "Subaru",
+    "Groupe PSA",
+    "Karmann",
+    "Citroën"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Audi Quattro»?",
+    "Audi",
+    "Daimler-Benz",
+    "Land Rover",
+    "АвтоВАЗ"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «BMW i8»?",
+    "BMW",
+    "Москвич",
+    "Iso",
+    "Lotus Cars"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Opel Calibra»?",
+    "Opel",
+    "Tata Motors",
+    "GM Korea",
+    "Горьковский автомобильный завод"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Peugeot 207»?",
+    "Peugeot",
+    "Maybach",
+    "Stellantis North America",
+    "Kia Motors"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Volkswagen up!»?",
+    "Volkswagen",
+    "Rolls-Royce Motor Cars",
+    "Горьковский автомобильный завод",
+    "Volkswagen Autoeuropa"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Cadillac Escalade»?",
+    "General Motors",
+    "Lancia",
+    "Dodge",
+    "Peugeot"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Kia Picanto»?",
+    "Kia Motors",
+    "Ford Germany",
+    "Karmann",
+    "Pagani Automobili"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Volkswagen New Beetle»?",
+    "Volkswagen",
+    "Škoda Auto",
+    "Bugatti Automobili",
+    "BMW M"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Ferrari 360»?",
+    "Ferrari",
+    "Москвич",
+    "Volkswagen Коммерческие автомобили",
+    "Saab Automobile AB"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Renault Duster»?",
+    "Renault",
+    "Koenigsegg",
+    "Карл Бенц",
+    "Pagani Automobili"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Tesla Model Y»?",
+    "Tesla, Inc.",
+    "Bentley Motors",
+    "Saab Automobile AB",
+    "Ford of Europe"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Toyota Auris»?",
+    "Toyota",
+    "Tata Motors",
+    "Maybach",
+    "Hyundai Motor"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Citroën Xsara»?",
+    "Peugeot",
+    "Ford of Britain",
+    "Mitsubishi Motors",
+    "GumperGumpert Sportwagenmanufakturt"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Fiat 126»?",
+    "Fiat",
+    "Dodge",
+    "Simca",
+    "Ford Germany"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Peugeot 208»?",
+    "Peugeot",
+    "Jaguar",
+    "Lancia",
+    "Mercedes-Benz Vans"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Ferrari F50»?",
+    "Ferrari",
+    "Daihatsu",
+    "Simca",
+    "Jaguar"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Kia cee’d»?",
+    "Kia Motors",
+    "HWA AG",
+    "Maybach",
+    "Fiat Group"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Renault 5»?",
+    "Renault",
+    "SEAT",
+    "Ламборгини",
+    "Карл Бенц"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Škoda Superb»?",
+    "Škoda Auto",
+    "British Motor Corporation",
+    "HWA AG",
+    "Pininfarina"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Ferrari 599 GTB Fiorano»?",
+    "Ferrari",
+    "BMW M",
+    "Dacia",
+    "Jaguar"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Hyundai i10»?",
+    "Hyundai Motor",
+    "Land Rover",
+    "Mazda",
+    "Ford of Britain"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Porsche Carrera GT»?",
+    "Porsche",
+    "Rolls-Royce Motor Cars",
+    "Daimler-Benz",
+    "British Motor Corporation"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Dodge Viper»?",
+    "Stellantis North America",
+    "Mitsubishi Motors",
+    "Porsche",
+    "General Motors"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Ford Transit»?",
+    "Ford",
+    "SEAT",
+    "Aston Martin",
+    "Peel Engineering Company"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Honda CR-V»?",
+    "Honda",
+    "Lancia",
+    "Volkswagen",
+    "Kia Motors"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Kia Rio»?",
+    "Kia Motors",
+    "Bentley Motors",
+    "Peel Engineering Company",
+    "Ford do Brasil"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «BMW M5»?",
+    "BMW",
+    "Toyota",
+    "Bugatti",
+    "GumperGumpert Sportwagenmanufakturt"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Fiat 600»?",
+    "Fiat",
+    "Volkswagen Коммерческие автомобили",
+    "Plymouth",
+    "British Motor Corporation"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Hyundai i30»?",
+    "Hyundai Motor",
+    "General Motors",
+    "Ламборгини",
+    "British Motor Corporation"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Nissan Skyline»?",
+    "Nissan",
+    "Ford of Britain",
+    "Land Rover",
+    "SEAT"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Peugeot 406»?",
+    "Peugeot",
+    "Smart",
+    "Jeep",
+    "Renault"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «SEAT León»?",
+    "SEAT",
+    "Maybach",
+    "Ford of Britain",
+    "British Motor Corporation"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Fiat 124»?",
+    "Fiat",
+    "Saab Automobile AB",
+    "Nissan",
+    "Jaguar"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Kia Sportage»?",
+    "Kia Motors",
+    "Fiat",
+    "Tesla, Inc.",
+    "Honda"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Lamborghini Veneno»?",
+    "Ламборгини",
+    "Audi",
+    "Honda",
+    "Fiat"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Mercedes-Benz W124»?",
+    "Daimler-Benz",
+    "Bentley Motors",
+    "Dacia",
+    "Ford of Europe"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Opel Adam»?",
+    "Opel",
+    "Škoda Auto",
+    "BMW",
+    "Simca"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Peugeot 106»?",
+    "Peugeot",
+    "Ford",
+    "Ford of Europe",
+    "Cadillac"
+  ],
+  [
+    2,
+    "Какая компания выпускала или выпускает модель «Peugeot 407»?",
+    "Peugeot",
+    "Hyundai Motor",
+    "British Motor Corporation",
+    "Volkswagen Коммерческие автомобили"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Citroën C5»?",
+    "Peugeot",
+    "Tata Motors",
+    "Škoda Auto",
+    "Mercedes-Benz Vans"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Ford Kuga»?",
+    "Ford",
+    "Volkswagen",
+    "Ford Germany",
+    "Citroën"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Ford Model A»?",
+    "Ford",
+    "Volkswagen",
+    "Honda",
+    "Ferrari"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Hyundai Santa Fe»?",
+    "Hyundai Motor",
+    "Kia Motors",
+    "Suzuki Motor Corporation",
+    "Bugatti Automobili"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Lamborghini Miura»?",
+    "Ламборгини",
+    "Ford of Britain",
+    "BMW",
+    "Subaru"
+  ],
+  [
+    2,
+    "Под маркой какой компании вышел автомобиль «Volkswagen Touran»?",
+    "Volkswagen",
+    "Renault",
+    "Alfa Romeo",
+    "Jaguar Land Rover"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Citroën Berlingo»?",
+    "Peugeot",
+    "Cadillac",
+    "Ford of Britain",
+    "Land Rover"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Ford C-Max»?",
+    "Ford",
+    "Tesla, Inc.",
+    "Volkswagen Autoeuropa",
+    "Honda"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Kia Carnival»?",
+    "Kia Motors",
+    "Porsche",
+    "Peugeot",
+    "Ламборгини"
+  ],
+  [
+    2,
+    "К какому автопроизводителю относится модель «Lamborghini Sesto Elemento»?",
+    "Ламборгини",
+    "Bugatti Automobili",
+    "HWA AG",
+    "Kia Motors"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «McLaren F1»?",
+    "McLaren",
+    "Fiat Group",
+    "Fiat",
+    "Maybach"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Porsche Cayman»?",
+    "Porsche",
+    "Stellantis Europe",
+    "BMW M",
+    "Volvo Cars"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Renault 25»?",
+    "Renault",
+    "Autobianchi",
+    "GumperGumpert Sportwagenmanufakturt",
+    "Fiat"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Toyota Avensis»?",
+    "Toyota",
+    "Škoda Auto",
+    "Jaguar Land Rover",
+    "Ford of Britain"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «BMW Z4»?",
+    "BMW",
+    "Mazda",
+    "Suzuki Motor Corporation",
+    "Ford"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Ferrari 288 GTO»?",
+    "Ferrari",
+    "Simca",
+    "Jeep",
+    "Карл Бенц"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Hyundai Elantra»?",
+    "Hyundai Motor",
+    "Land Rover",
+    "Tesla, Inc.",
+    "Bugatti Automobili"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «LADA Vesta»?",
+    "АвтоВАЗ",
+    "Tata Motors",
+    "Talbot",
+    "Peugeot"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Lamborghini Reventón»?",
+    "Ламборгини",
+    "Dacia",
+    "Volvo Cars",
+    "Simca"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Suzuki Swift»?",
+    "Suzuki Motor Corporation",
+    "Autobianchi",
+    "Jaguar",
+    "Застава"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Volkswagen Eos»?",
+    "Volkswagen",
+    "Audi",
+    "АвтоВАЗ",
+    "Застава"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Alfa Romeo 147»?",
+    "Alfa Romeo",
+    "Dacia",
+    "Jeep",
+    "Groupe PSA"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «BMW M1»?",
+    "BMW",
+    "Hyundai Motor",
+    "Volkswagen Коммерческие автомобили",
+    "Bentley Motors"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Citroën Traction Avant»?",
+    "Citroën",
+    "Dacia",
+    "Karmann",
+    "Pagani Automobili"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Ferrari 250 GTO»?",
+    "Ferrari",
+    "Ламборгини",
+    "Mitsubishi Motors",
+    "Groupe PSA"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Ford Ka»?",
+    "Pininfarina",
+    "Jaguar",
+    "Ford of Europe",
+    "British Motor Corporation"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Kia Sorento»?",
+    "Kia Motors",
+    "McLaren",
+    "Ламборгини",
+    "Stellantis North America"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Peugeot 508»?",
+    "Peugeot",
+    "Daimler-Benz",
+    "Groupe PSA",
+    "Volkswagen"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Porsche 924»?",
+    "Porsche",
+    "Shelby Super Cars",
+    "Peugeot",
+    "GumperGumpert Sportwagenmanufakturt"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Alfa Romeo 156»?",
+    "Alfa Romeo",
+    "Land Rover",
+    "Daewoo Motors",
+    "Bugatti"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Alfa Romeo MiTo»?",
+    "Alfa Romeo",
+    "Ламборгини",
+    "McLaren",
+    "Kia Motors"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «BMW E46»?",
+    "BMW",
+    "Pagani Automobili",
+    "Tesla, Inc.",
+    "Maserati"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Ford Crown Victoria»?",
+    "Ford",
+    "Renault",
+    "Stellantis Europe",
+    "Volkswagen"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Honda NSX»?",
+    "Honda",
+    "Talbot",
+    "Tata Motors",
+    "Dodge"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Mercedes-Benz W201»?",
+    "Daimler-Benz",
+    "Autobianchi",
+    "GumperGumpert Sportwagenmanufakturt",
+    "Toyota"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Mitsubishi L200»?",
+    "Mitsubishi Motors",
+    "Land Rover",
+    "Dacia",
+    "Maserati"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Peugeot 107»?",
+    "Peugeot",
+    "Simca",
+    "Honda",
+    "Koenigsegg"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Renault 21»?",
+    "Renault",
+    "Jeep",
+    "General Motors",
+    "Mitsubishi Motors"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Toyota Mirai»?",
+    "Toyota",
+    "Aston Martin",
+    "Горьковский автомобильный завод",
+    "Lotus Cars"
+  ],
+  [
+    3,
+    "К какому автопроизводителю относится модель «Volkswagen Amarok»?",
+    "Volkswagen",
+    "Suzuki Motor Corporation",
+    "Nissan",
+    "Bugatti"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Alfa Romeo 159»?",
+    "Fiat Group",
+    "Peel Engineering Company",
+    "Dacia",
+    "Bentley Motors"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Aston Martin DB5»?",
+    "Aston Martin",
+    "GM Korea",
+    "Stellantis North America",
+    "Jaguar Land Rover"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «BMW E30»?",
+    "BMW",
+    "Mercedes-Benz Group",
+    "Ford do Brasil",
+    "General Motors"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Ford Edge»?",
+    "Ford",
+    "Suzuki Motor Corporation",
+    "Tata Motors",
+    "General Motors"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Hyundai Sonata»?",
+    "Hyundai Motor",
+    "Ульяновский автомобильный завод",
+    "Daimler-Benz",
+    "Peel Engineering Company"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Mazda3»?",
+    "Mazda",
+    "BMW M",
+    "Ульяновский автомобильный завод",
+    "Dodge"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Mercedes-Benz W198»?",
+    "Daimler-Benz",
+    "Stellantis Europe",
+    "Opel",
+    "Ford Germany"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Nissan Juke»?",
+    "Nissan",
+    "Suzuki Motor Corporation",
+    "Opel",
+    "Rolls-Royce Motor Cars"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Peugeot 3008»?",
+    "Peugeot",
+    "Dacia",
+    "Daihatsu",
+    "Hyundai Motor"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Peugeot 607»?",
+    "Peugeot",
+    "Ламборгини",
+    "Talbot",
+    "Koenigsegg"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Porsche 928»?",
+    "Porsche",
+    "Hyundai Motor",
+    "Audi",
+    "Карл Бенц"
+  ],
+  [
+    3,
+    "Какая компания выпускала или выпускает модель «Zastava Koral»?",
+    "Застава",
+    "Audi",
+    "Autobianchi",
+    "Karmann"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Alfa Romeo 155»?",
+    "Alfa Romeo",
+    "Talbot",
+    "Audi",
+    "GumperGumpert Sportwagenmanufakturt"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «BMW X7»?",
+    "BMW",
+    "Saab Automobile AB",
+    "Lancia",
+    "Opel"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Chrysler PT Cruiser»?",
+    "Stellantis North America",
+    "Fiat",
+    "Kia Motors",
+    "GumperGumpert Sportwagenmanufakturt"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «DS 3»?",
+    "Groupe PSA",
+    "Ford Germany",
+    "Mitsubishi Motors",
+    "Volvo Cars"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Ferrari F355»?",
+    "Ferrari",
+    "Застава",
+    "Bentley Motors",
+    "Stellantis Europe"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Ferrari FF»?",
+    "Ferrari",
+    "Mitsubishi Motors",
+    "Groupe PSA",
+    "General Motors"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Ford S-Max»?",
+    "Ford",
+    "SEAT",
+    "Горьковский автомобильный завод",
+    "Smart"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Kia Soul»?",
+    "Kia Motors",
+    "Cadillac",
+    "Mercedes-Benz Vans",
+    "Saab Automobile AB"
+  ],
+  [
+    3,
+    "Под маркой какой компании вышел автомобиль «Porsche 356»?",
+    "Porsche",
+    "Ламборгини",
+    "Karmann",
+    "BMW"
+  ]
+]

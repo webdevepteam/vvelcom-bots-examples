@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f7fe">
+  <meta name="description" content="Квиз: автомобили, история, ИТ, фильмы и комиксы. Играйте одни или раундом в группе. Мини-приложение VVelcom.">
+  <title>Квиз — игра в VVelcom</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
+  <link rel="stylesheet" href="./styles.css?v=1.0.0">
+  <script async src="https://apibots.vvelcom.online/bot-platform/js/vvelcom-web-app.js" onload="window.dispatchEvent(new Event('vvelcom-sdk-ready'))"></script>
+  <script src="./quiz-rules.js?v=1.0.0"></script>
+  <script defer src="./app.js?v=1.0.0"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="brand" id="brand" aria-label="На главную"><span class="brand-mark" aria-hidden="true">?</span><strong>Квиз</strong></button>
+      <button type="button" class="chip-button" id="top-board">🏆 Рейтинг</button>
+    </header>
+    <main id="app" aria-live="polite"><p class="loading">Загрузка вопросов…</p></main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
