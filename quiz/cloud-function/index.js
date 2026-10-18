@@ -146,11 +146,18 @@ function roundText(round, rows, forFeed = false) {
   if (forFeed) lines.push('', `Сыграй и ты 👉 ${BOT_LINK}`);
   return lines.join('\n');
 }
+/** Link that opens this very round for whoever follows it (the platform signs the start_param). */
+const roundLink = (round) => `https://uvvel.com/${BOT_LINK}?startapp=r_${round.id}`;
+/** The invitation the person sends to a chat of their choice (app tags: the link is a hyperlink). */
+const inviteText = (round) => `🧠 Предлагаю сыграть в квиз-раунд! [url=${roundLink(round)}]Играть в раунд[/url]`;
+
 function roundMarkup(round, rows) {
   const gameUrl = process.env.GAME_URL || '';
   const closed = stats.isClosed(round);
   const keyboard = [];
   if (!closed && gameUrl.startsWith('https://')) keyboard.push([{ text: '🎮 Играть в раунд', web_app: { url: gameUrl, start_param: `r_${round.id}` } }]);
+  if (!closed) keyboard.push([{ text: '📨 Пригласить в раунд', share_to_chat: { text: inviteText(round) } }]);
+  if (!closed) keyboard.push([{ text: '🛑 Завершить раунд', callback_data: `qz:end:${round.id}` }]);
   if (rows.length) keyboard.push([{ text: '📣 В ленту', share_to_feed: { text: roundText(round, rows, true) } }]);
   return keyboard.length ? { inline_keyboard: keyboard } : undefined;
 }
@@ -229,7 +236,7 @@ async function roundInfo(auth, origin) {
   const rows = await stats.roundResults(round.id);
   const mine = rows.findIndex((r) => r.userId === auth.userId);
   return result(200, {
-    ok: true, round: publicRound(round), board: boardFor(rows, auth.userId).slice(0, BOARD_ROWS), players: rows.length,
+    ok: true, round: publicRound(round), shareUrl: roundLink(round), board: boardFor(rows, auth.userId).slice(0, BOARD_ROWS), players: rows.length,
     played: mine >= 0, myPlace: mine >= 0 ? mine + 1 : null, myResult: mine >= 0 ? { score: rows[mine].score, correct: rows[mine].correct, total: rows[mine].total } : null,
   }, origin);
 }
@@ -335,6 +342,7 @@ const HELP_TEXT = [
   '🧠 /quiz — квиз-раунд для чата или группы',
   '🏆 /top — рейтинг игроков',
   '📊 /stats — моя статистика',
+  '📋 /rounds — мои активные раунды (завершить досрочно)',
   '✏️ /name Новое имя — сменить имя в рейтинге',
   '',
   'Или нажмите кнопку ниже 👇',
@@ -365,10 +373,10 @@ function settingsView(mask, difficulty, countIndex) {
   rows.push([mask === all ? { text: '☐ Снять все', callback_data: data('c', 0, difficulty, countIndex) } : { text: '☑ Выбрать все', callback_data: data('c', all, difficulty, countIndex) }]);
   for (let i = 0; i < rules.DIFFICULTIES.length; i += 2) {
     rows.push(rules.DIFFICULTIES.slice(i, i + 2).map((d) => ({
-      text: `${d.id === difficulty ? '🔘' : '⚪'} ${d.emoji} ${d.title}`, callback_data: data('c', mask, d.id, countIndex),
+      text: `${d.id === difficulty ? '●' : '○'} ${d.emoji} ${d.title}`, callback_data: data('c', mask, d.id, countIndex),
     })));
   }
-  rows.push(rules.COUNTS.map((n, i) => ({ text: `${i === countIndex ? '🔘' : '⚪'} ${n} вопр.`, callback_data: data('c', mask, difficulty, i) })));
+  rows.push(rules.COUNTS.map((n, i) => ({ text: `${i === countIndex ? '●' : '○'} ${n} вопр.`, callback_data: data('c', mask, difficulty, i) })));
   rows.push([{ text: '▶️ Создать раунд', callback_data: data('go', mask, difficulty, countIndex) }]);
   const text = ['🧠 Новый квиз-раунд', '', 'Отметьте категории, выберите сложность и число вопросов. У всех игроков раунда будут одни и те же вопросы, а таблица результатов обновляется прямо в этом сообщении.'].join('\n');
   return { text, markup: { inline_keyboard: rows } };
@@ -407,6 +415,18 @@ async function commandReply(cmd, arg, from) {
     const view = settingsView(...DEFAULT_SETTINGS);
     return { text: view.text, markup: view.markup };
   }
+  if (cmd === 'rounds' || cmd === 'myrounds') {
+    const list = await stats.activeRoundsOf(userId);
+    if (!list.length) return { text: '📋 Активных раундов нет. Создать: /quiz' };
+    const lines = ['📋 Ваши активные раунды:', ''];
+    const rows = [];
+    for (const [i, r] of list.entries()) {
+      const n = (await stats.roundResults(r.id)).length;
+      lines.push(`${i + 1}. ${settingsLine(r).join(' · ')} — игроков: ${n}, до ${formatDeadline(r.expiresAt)}`);
+      rows.push([{ text: `🛑 Завершить №${i + 1}`, callback_data: `qz:end:${r.id}` }, { text: `📨 №${i + 1}`, share_to_chat: { text: inviteText(r) } }]);
+    }
+    return { text: lines.join('\n'), markup: { inline_keyboard: rows } };
+  }
   if (cmd === 'help') return { text: HELP_TEXT.replace(HELP_UNKNOWN, '📋 Что я умею:'), markup: menuMarkup() };
   return null;
 }
@@ -443,6 +463,15 @@ async function handleCallback(query) {
     const round = await stats.createRound({ ...settings, ids: newRoundQuestions(settings), creatorId: String(query.from?.id || ''), chatId: String(chatId), messageId: String(messageId) });
     await answer();
     await callBotApi('editMessageText', { chat_id: chatId, message_id: messageId, text: roundText(round, []), reply_markup: roundMarkup(round, []) });
+    return;
+  }
+  if (parts[1] === 'end') {
+    const round = await stats.getRound(parts[2]);
+    if (!round) { await answer({ text: 'Раунд не найден', show_alert: true }); return; }
+    if (round.creatorId !== String(query.from?.id || '')) { await answer({ text: 'Завершить раунд может только его создатель', show_alert: true }); return; }
+    if (!stats.isClosed(round)) await stats.closeRound(round);
+    await closeIfExpired(round);
+    await answer({ text: 'Раунд завершён' });
     return;
   }
   const cmd = parts[1];

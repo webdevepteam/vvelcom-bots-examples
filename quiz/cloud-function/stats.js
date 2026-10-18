@@ -178,6 +178,20 @@ async function getRound(id) {
 }
 async function updateRound(round) { await writeJson(path.join(roundDir(round.id), 'round.json'), round); }
 const isClosed = (round) => Date.now() > round.expiresAt;
+/** Rounds created by a person that still accept results, newest first. */
+async function activeRoundsOf(userId) {
+  let ids = [];
+  try { ids = await fs.readdir(path.join(storageDir(), 'rounds')); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  const out = [];
+  for (const id of ids) {
+    const round = ROUND_ID.test(id) ? await readJson(path.join(roundDir(id), 'round.json')).catch(() => null) : null;
+    if (round && round.creatorId === String(userId) && !isClosed(round)) out.push(round);
+  }
+  return out.sort((a, b) => b.createdAt - a.createdAt).slice(0, 10);
+}
+/** Ends a round ahead of time: results stop being accepted at once. */
+async function closeRound(round) { round.expiresAt = Date.now() - 1; round.closedPosted = false; await updateRound(round); return round; }
 
 async function roundResults(id) {
   let files = [];
@@ -203,5 +217,5 @@ async function addRoundResult(roundId, userId, name, graded) {
 
 module.exports = {
   cleanName, scoreAnswers, recordGame, setName, leaderboard, playerStats, statsText, ensurePlayer,
-  createRound, getRound, updateRound, isClosed, roundResults, addRoundResult, roundHours,
+  createRound, getRound, updateRound, isClosed, activeRoundsOf, closeRound, roundResults, addRoundResult, roundHours,
 };

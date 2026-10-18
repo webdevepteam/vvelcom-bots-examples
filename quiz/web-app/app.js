@@ -315,7 +315,14 @@
       h('section', { class: 'card' }, h('h2', {}, `Результаты · ${data.players} ${plural(data.players, 'игрок', 'игрока', 'игроков')}`), boardList(data.board)),
       data.played ? h('p', { class: 'hint' }, `Вы уже играли: ${data.myResult.score} очков, ${data.myPlace}-е место. У каждого одна попытка.`) : null,
       !data.played && !r.closed ? h('button', { type: 'button', class: 'button button-primary', onclick: startRound }, 'Начать раунд →') : null,
+      !r.closed && data.shareUrl ? h('button', { type: 'button', class: 'button', onclick: () => shareRound(data.shareUrl) }, '🔗 Поделиться раундом') : null,
       h('button', { type: 'button', class: 'button', onclick: () => { round = null; goHome(); } }, 'Играть одному'));
+  }
+
+  // The link opens this very round for whoever follows it (start_param r_<id>, signed by the platform).
+  async function shareRound(url) {
+    try { await navigator.clipboard.writeText(url); toast('Ссылка на раунд скопирована — отправьте её в любой чат'); }
+    catch { window.prompt('Скопируйте ссылку на раунд', url); }
   }
 
   // ---- rating --------------------------------------------------------------------------------------------
