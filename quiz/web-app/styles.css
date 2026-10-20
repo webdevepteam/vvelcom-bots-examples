@@ -27,6 +27,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 0; font-size: 20px; }
 .brand-mark { width: 34px; height: 34px; border-radius: 11px; background: var(--purple); color: #fff; display: grid; place-items: center; font-weight: 800; }
 .chip-button { background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 8px 14px; font-size: 14px; }
+.tabs { display: flex; gap: 8px; margin: 10px 0 14px; }
+.chip-button[aria-pressed="true"] { background: var(--accent, #b39dff); color: #1a1530; border-color: transparent; font-weight: 700; }
+.rounds { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 10px; }
+.round-item { width: 100%; text-align: left; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px; display: grid; gap: 4px; color: inherit; font: inherit; }
+.round-title { font-weight: 700; }
 .loading { text-align: center; color: var(--muted); padding: 60px 0; }
 
 h1 { font-size: 26px; line-height: 1.15; margin: 0 0 6px; }

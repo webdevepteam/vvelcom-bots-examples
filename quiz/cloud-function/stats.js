@@ -205,6 +205,30 @@ async function roundResults(id) {
   rows.sort((a, b) => b.score - a.score || b.correct - a.correct || a.totalMs - b.totalMs || a.at - b.at);
   return rows;
 }
+/** Rounds the person created or played in, newest first: { round, mine: { created, played }, rows }. */
+async function roundsOfUser(userId, limit = 30) {
+  const uid = String(userId);
+  let ids = [];
+  try { ids = await fs.readdir(path.join(storageDir(), 'rounds')); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  const out = [];
+  for (const id of ids) {
+    if (!ROUND_ID.test(id)) continue;
+    const round = await readJson(path.join(roundDir(id), 'round.json')).catch(() => null);
+    if (!round) continue;
+    const created = round.creatorId === uid;
+    const played = Boolean(await readJson(path.join(roundDir(id), 'results', `${uid}.json`)).catch(() => null));
+    if (created || played) out.push({ round, created, played });
+  }
+  out.sort((a, b) => b.round.createdAt - a.round.createdAt);
+  return Promise.all(out.slice(0, limit).map(async (item) => ({ ...item, rows: await roundResults(item.round.id) })));
+}
+/** Whether this person may look at the round's table by its id: its creator or one of its players. */
+async function canViewRound(round, userId) {
+  if (round.creatorId === String(userId)) return true;
+  return Boolean(await readJson(path.join(roundDir(round.id), 'results', `${String(userId)}.json`)).catch(() => null));
+}
+
 /** One attempt per player. Returns the stored result, or { existing } when the player has already played. */
 async function addRoundResult(roundId, userId, name, graded) {
   const file = path.join(roundDir(roundId), 'results', `${String(userId)}.json`);
@@ -217,5 +241,5 @@ async function addRoundResult(roundId, userId, name, graded) {
 
 module.exports = {
   cleanName, scoreAnswers, recordGame, setName, leaderboard, playerStats, statsText, ensurePlayer,
-  createRound, getRound, updateRound, isClosed, activeRoundsOf, closeRound, roundResults, addRoundResult, roundHours,
+  createRound, getRound, updateRound, isClosed, roundsOfUser, canViewRound, activeRoundsOf, closeRound, roundResults, addRoundResult, roundHours,
 };

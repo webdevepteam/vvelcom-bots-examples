@@ -33,7 +33,7 @@
     }
     return el;
   }
-  function mount(...nodes) { app.replaceChildren(...nodes.flat()); window.scrollTo(0, 0); }
+  function mount(...nodes) { app.replaceChildren(...nodes.flat().filter((node) => node != null && node !== false)); window.scrollTo(0, 0); }
   function toast(text, isError) {
     const el = $('#toast');
     el.textContent = text;
@@ -66,6 +66,75 @@
       if (R.COUNTS[saved.countIndex]) prefs.countIndex = saved.countIndex;
       if (Number.isFinite(saved.best)) prefs.best = saved.best;
     } catch { /* storage may be blocked */ }
+  }
+  // ---- rounds the person has opened by a link: kept in the browser, so the home screen can list them
+  // and count the time down without asking the function (each call to it costs a Yandex Cloud invocation).
+  const ROUNDS_KEY = 'quiz.rounds.v1';
+  function loadRounds() {
+    try {
+      const list = JSON.parse(localStorage.getItem(ROUNDS_KEY) || '[]');
+      return Array.isArray(list) ? list.filter((r) => r && typeof r.id === 'string' && Number.isFinite(r.expiresAt)) : [];
+    } catch { return []; }
+  }
+  function saveRounds(list) { try { localStorage.setItem(ROUNDS_KEY, JSON.stringify(list.slice(0, 20))); } catch { /* ignore */ } }
+  /** Active (not yet expired) cached rounds, soonest to end first; expired ones are dropped for good. */
+  function activeRounds() {
+    const all = loadRounds();
+    const live = all.filter((r) => r.expiresAt > Date.now());
+    if (live.length !== all.length) saveRounds(live);
+    return live.sort((a, b) => a.expiresAt - b.expiresAt);
+  }
+  function rememberRound(info, played, shareUrl) {
+    if (!info || typeof info.id !== 'string' || info.closed) return;
+    const list = loadRounds().filter((r) => r.id !== info.id);
+    const before = loadRounds().find((r) => r.id === info.id);
+    list.unshift({
+      id: info.id, cats: info.cats, difficulty: info.difficulty, count: info.count, expiresAt: info.expiresAt,
+      played: Boolean(played) || Boolean(before?.played), shareUrl: shareUrl || before?.shareUrl || '',
+    });
+    saveRounds(list);
+  }
+  function markRoundPlayed(id) {
+    const list = loadRounds();
+    const found = list.find((r) => r.id === id);
+    if (found) { found.played = true; saveRounds(list); }
+  }
+  const pad2 = (n) => String(n).padStart(2, '0');
+  function countdown(ms) {
+    const left = Math.max(0, Math.floor((ms - Date.now()) / 1000));
+    const d = Math.floor(left / 86400), hh = Math.floor((left % 86400) / 3600), mm = Math.floor((left % 3600) / 60), ss = left % 60;
+    return `${d ? `${d} д ` : ''}${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
+  }
+  let homeTicker = null;
+  function stopHomeTicker() { clearInterval(homeTicker); homeTicker = null; }
+  function openCachedRound(r) {
+    // A round can be played only through its own link (the platform signs its start_param), so a round
+    // not played yet is reopened that way; a played one just shows its table.
+    if (!r.played && r.shareUrl && typeof sdk?.openTelegramLink === 'function') {
+      try { sdk.openTelegramLink(r.shareUrl); return; } catch { /* fall through to the table */ }
+    }
+    openRound(r.id);
+  }
+  function activeRoundsSection() {
+    const rounds = activeRounds();
+    if (!rounds.length) return null;
+    const items = rounds.map((r) => {
+      const left = h('strong', { class: 'timer', 'data-until': String(r.expiresAt) }, countdown(r.expiresAt));
+      return h('li', {}, h('button', { type: 'button', class: 'round-item', onclick: () => openCachedRound(r) },
+        h('span', { class: 'round-title' }, r.cats.map((id) => catById.get(id)?.emoji || '').join(' '), ` ${diffById.get(r.difficulty)?.title || ''} · ${r.count} ${plural(r.count, 'вопрос', 'вопроса', 'вопросов')}`),
+        h('span', { class: 'sub' }, '⏳ До конца: ', left, r.played ? ' · вы сыграли ✓' : ' · можно играть')));
+    });
+    stopHomeTicker();
+    homeTicker = setInterval(() => {
+      if (screen !== 'home') { stopHomeTicker(); return; }
+      let expired = false;
+      document.querySelectorAll('.timer[data-until]').forEach((el) => {
+        const until = Number(el.getAttribute('data-until'));
+        if (until <= Date.now()) expired = true; else el.textContent = countdown(until);
+      });
+      if (expired) goHome();
+    }, 1000);
+    return h('section', { class: 'card' }, h('h2', {}, 'Активные раунды'), h('ol', { class: 'rounds' }, items));
   }
   function savePrefs() { try { localStorage.setItem(STORAGE, JSON.stringify(prefs)); } catch { /* ignore */ } }
 
@@ -109,7 +178,7 @@
 
   // ---- home: category, difficulty and count --------------------------------------------------------------
   function goHome() {
-    stopTimer(); game = null;
+    stopTimer(); stopHomeTicker(); game = null;
     setScreen('home');
     const total = bank.length;
     const pool = bank.filter((q) => prefs.cats.includes(q.c)).length;
@@ -124,6 +193,7 @@
     mount(
       h('h1', {}, 'Квиз 🧠'),
       h('p', { class: 'lead' }, 'Выберите темы, сложность и число вопросов — и проверьте себя. Можно играть одному или устроить раунд для чата.'),
+      activeRoundsSection(),
       h('section', { class: 'card' },
         h('div', { class: 'card-head' }, h('h2', {}, 'Категории'),
           h('button', { type: 'button', class: 'link-button', onclick: () => { prefs.cats = allSelected ? [prefs.cats[0]] : R.CATEGORIES.map((c) => c.id); savePrefs(); goHome(); } }, allSelected ? 'Только одна' : 'Выбрать все')),
@@ -250,7 +320,7 @@
     if (!canTalk()) return;
     const data = await api({ action: 'record', answers: g.answers, round: Boolean(g.round) });
     if (game !== g) return;
-    if (data.ok && g.round) round.played = true;
+    if (data.ok && g.round) { round.played = true; markRoundPlayed(round.round.id); }
     renderResult(g, correct, total, data.ok ? data : null, data.ok ? '' : (data.message || 'Результат не сохранён.'));
   }
   function renderResult(g, correct, total, saved, note) {
@@ -274,9 +344,20 @@
       h('section', { class: 'card' }, h('h2', {}, 'По категориям'), perCat),
       mistakes.length ? h('section', { class: 'card' }, h('h2', {}, 'Работа над ошибками'),
         h('ol', { class: 'review' }, mistakes.map(({ q }) => h('li', {}, q.q, h('small', {}, `Правильно: ${q.answerText}`))))) : null,
-      share ? h('button', { type: 'button', class: 'button button-primary', onclick: () => shareResult(g) }, '📣 Поделиться результатом') : null,
+      saved?.feedText && typeof sdk?.shareToFeed === 'function' ? h('button', { type: 'button', class: 'button button-primary', onclick: () => shareToFeed(saved.feedText) }, '📣 В ленту') : null,
+      share ? h('button', { type: 'button', class: 'button', onclick: () => shareResult(g) }, '💬 Отправить в чат') : null,
       g.round ? h('button', { type: 'button', class: 'button button-primary', onclick: openRound }, 'К таблице раунда') : h('button', { type: 'button', class: 'button button-primary', onclick: startSolo }, 'Сыграть ещё →'),
       h('button', { type: 'button', class: 'button', onclick: goHome }, 'К настройкам'));
+  }
+  // Publishes the result to the person's own feed (the app shows the text and asks first).
+  function shareToFeed(text) {
+    try {
+      sdk.shareToFeed(text, (status) => {
+        if (status === 'published') toast('Опубликовано в ленте');
+        else if (status === 'failed') toast('Не удалось опубликовать — попробуйте ещё раз', true);
+        else if (status === 'unsupported') toast('Обновите приложение VVelcom, чтобы делиться в ленту', true);
+      });
+    } catch { toast('Не удалось опубликовать', true); }
   }
   async function shareResult(g) {
     const data = await api({ action: 'share', answers: g.answers });
@@ -292,17 +373,22 @@
   }
 
   // ---- group round ---------------------------------------------------------------------------------------
-  async function openRound() {
+  // `roundId` — a round picked from the «Мои раунды» list (a table to look at); otherwise the one the link opened.
+  async function openRound(roundId) {
+    if (typeof roundId !== 'string') roundId = null;
     stopTimer(); game = null;
     setScreen('round');
     mount(h('p', { class: 'loading' }, 'Загружаем раунд…'));
-    const data = await api({ action: 'round' });
+    const data = await api(roundId ? { action: 'round', roundId } : { action: 'round' });
     if (!data.ok) {
       mount(h('h1', {}, 'Раунд недоступен'), h('p', { class: 'lead' }, data.message || 'Не удалось открыть раунд.'),
-        h('button', { type: 'button', class: 'button button-primary', onclick: goHome }, 'Играть одному'));
+        h('button', { type: 'button', class: 'button button-primary', onclick: roundId ? () => showBoard('rounds') : goHome }, roundId ? 'К моим раундам' : 'Играть одному'));
       return;
     }
     round = data;
+    rememberRound(data.round, data.played, data.shareUrl);
+    // Playing needs the round's own link (the platform signs its start_param), so a round opened from the list is view-only.
+    const viewOnly = Boolean(roundId) && startParam() !== `r_${roundId}`;
     const r = data.round;
     const diff = diffById.get(r.difficulty);
     const until = new Date(r.expiresAt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
@@ -314,8 +400,9 @@
         h('span', {}, r.closed ? 'Приём результатов закончен' : `⏳ До ${until}`)),
       h('section', { class: 'card' }, h('h2', {}, `Результаты · ${data.players} ${plural(data.players, 'игрок', 'игрока', 'игроков')}`), boardList(data.board)),
       data.played ? h('p', { class: 'hint' }, `Вы уже играли: ${data.myResult.score} очков, ${data.myPlace}-е место. У каждого одна попытка.`) : null,
-      !data.played && !r.closed ? h('button', { type: 'button', class: 'button button-primary', onclick: startRound }, 'Начать раунд →') : null,
+      !viewOnly && !data.played && !r.closed ? h('button', { type: 'button', class: 'button button-primary', onclick: startRound }, 'Начать раунд →') : null,
       !r.closed && data.shareUrl ? h('button', { type: 'button', class: 'button', onclick: () => shareRound(data.shareUrl) }, '🔗 Поделиться раундом') : null,
+      roundId ? h('button', { type: 'button', class: 'button', onclick: () => showBoard('rounds') }, '← К моим раундам') : null,
       h('button', { type: 'button', class: 'button', onclick: () => { round = null; goHome(); } }, 'Играть одному'));
   }
 
@@ -326,9 +413,34 @@
   }
 
   // ---- rating --------------------------------------------------------------------------------------------
-  async function showBoard() {
+  // Tabs of the rating screen: the overall table and the person's own rounds.
+  function boardTabs(active) {
+    const tab = (id, label) => h('button', { type: 'button', class: 'chip-button', 'aria-pressed': String(active === id), onclick: () => showBoard(id) }, label);
+    return h('div', { class: 'tabs' }, tab('top', 'Рейтинг'), tab('rounds', 'Мои раунды'));
+  }
+  async function showRounds() {
+    const data = await api({ action: 'myRounds' });
+    if (!data.ok) {
+      mount(h('h1', {}, 'Мои раунды'), boardTabs('rounds'), h('p', { class: 'lead' }, data.message || 'Список раундов сейчас недоступен.'),
+        h('button', { type: 'button', class: 'button', onclick: goHome }, 'Назад'));
+      return;
+    }
+    const fmt = (ms) => new Date(ms).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const items = data.rounds.map((r) => h('li', {},
+      h('button', { type: 'button', class: 'round-item', onclick: () => openRound(r.id) },
+        h('span', { class: 'round-title' }, r.cats.map((id) => catById.get(id)?.emoji || '').join(' '), ` ${diffById.get(r.difficulty)?.title || ''} · ${r.count} ${plural(r.count, 'вопрос', 'вопроса', 'вопросов')}`),
+        h('span', { class: 'sub' }, `${fmt(r.createdAt)} · ${r.closed ? 'завершён' : `идёт до ${fmt(r.expiresAt)}`} · ${r.players} ${plural(r.players, 'игрок', 'игрока', 'игроков')}`),
+        h('span', { class: 'sub' }, r.played ? `Вы: ${medal(r.myPlace)} ${r.myPlace}-е место, ${r.myScore} очков` : 'Вы не играли в этом раунде'))));
+    mount(
+      h('h1', {}, 'Мои раунды'), boardTabs('rounds'),
+      h('p', { class: 'lead' }, 'Раунды, которые вы создали или в которых играли. Нажмите, чтобы увидеть таблицу.'),
+      data.rounds.length ? h('ol', { class: 'rounds' }, items) : h('section', { class: 'card' }, h('p', { class: 'empty' }, 'Пока нет раундов. Создайте раунд в чате командой /quiz.')),
+      h('button', { type: 'button', class: 'button', onclick: () => (round && !game ? openRound() : goHome()) }, 'Назад'));
+  }
+  async function showBoard(tabId) {
     setScreen('board');
     mount(h('p', { class: 'loading' }, 'Загружаем рейтинг…'));
+    if (tabId === 'rounds') { await showRounds(); return; }
     const data = await api({ action: 'leaderboard' });
     if (!data.ok) {
       mount(h('h1', {}, 'Рейтинг'), h('p', { class: 'lead' }, data.message || 'Рейтинг сейчас недоступен.'),
@@ -340,7 +452,7 @@
     const me = data.me;
     const accuracy = me.answered ? Math.round((me.correct / me.answered) * 100) : 0;
     mount(
-      h('h1', {}, 'Рейтинг 🏆'),
+      h('h1', {}, 'Рейтинг 🏆'), boardTabs('top'),
       h('p', { class: 'lead' }, 'Рейтинг — сумма десяти лучших партий.'),
       h('section', { class: 'card' }, data.board.top.length
         ? h('ol', { class: 'board' }, data.board.top.map((r) => h('li', { class: data.board.me && data.board.me.place === r.place ? 'me' : '' },
@@ -370,7 +482,7 @@
   async function init() {
     loadPrefs();
     $('#brand').addEventListener('click', () => { if (screen !== 'game') goHome(); });
-    $('#top-board').addEventListener('click', () => { if (screen !== 'game') showBoard(); });
+    $('#top-board').addEventListener('click', () => { if (screen !== 'game') showBoard('top'); });
     document.addEventListener('keydown', onKey);
     window.addEventListener('vvelcom-sdk-ready', integrateSdk);
     try {

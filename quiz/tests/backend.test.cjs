@@ -158,6 +158,21 @@ test('group round: create in chat, play, the message with the table is edited', 
   const solo = await post({ action: 'record', initData: anna, round: false, answers: answersFor(ids, 7) });
   assert.equal(solo.ok, true);
   assert.equal(solo.round, undefined);
+
+  // «Мои раунды»: the creator and each player see the round, a stranger neither sees it nor can open it by id
+  const mine = await post({ action: 'myRounds', initData: anna });
+  assert.equal(mine.ok, true);
+  const listed = mine.rounds.find((r) => r.id === startParam.slice(2));
+  assert.ok(listed, 'a played round is listed');
+  assert.equal(listed.played, true);
+  assert.equal(listed.myPlace, 2);
+  assert.equal(listed.players, 2);
+  const byId = await post({ action: 'round', initData: signedInitData('anna', 'Анна'), roundId: startParam.slice(2) });
+  assert.equal(byId.ok, true);
+  assert.equal(byId.board.length, 2);
+  const stranger = signedInitData('eve', 'Ева');
+  assert.equal((await post({ action: 'myRounds', initData: stranger })).rounds.length, 0);
+  assert.equal((await post({ action: 'round', initData: stranger, roundId: startParam.slice(2) })).status, 403);
 });
 
 test('expired round: closed, no more results, final table posted once', async () => {

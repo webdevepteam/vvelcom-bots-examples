@@ -228,10 +228,12 @@ function newRoundQuestions(settings) {
 const publicRound = (round) => ({ id: round.id, cats: round.cats, difficulty: round.difficulty, count: round.ids.length, ids: round.ids, expiresAt: round.expiresAt, closed: stats.isClosed(round) });
 const boardFor = (rows, userId) => rows.map((r, i) => ({ place: i + 1, name: r.name, score: r.score, correct: r.correct, total: r.total, me: r.userId === userId }));
 
-async function roundInfo(auth, origin) {
-  const match = ROUND_PARAM.exec(auth.startParam);
+async function roundInfo(auth, origin, roundId) {
+  // A round opened from the list of one's own rounds is named by its id; a link names it by start_param.
+  const match = typeof roundId === 'string' ? [null, roundId] : ROUND_PARAM.exec(auth.startParam);
   const round = match && await stats.getRound(match[1]);
   if (!round) return fail(404, 'ROUND_NOT_FOUND', 'Раунд не найден. Возможно, он устарел.', origin);
+  if (typeof roundId === 'string' && !(await stats.canViewRound(round, auth.userId))) return fail(403, 'ROUND_FORBIDDEN', 'Таблица доступна создателю и участникам раунда.', origin);
   await closeIfExpired(round);
   const rows = await stats.roundResults(round.id);
   const mine = rows.findIndex((r) => r.userId === auth.userId);
@@ -258,11 +260,11 @@ async function recordAction(body, auth, origin) {
     await refreshRoundMessage(round);
     const rows = await stats.roundResults(round.id);
     const place = rows.findIndex((r) => r.userId === auth.userId) + 1;
-    return result(200, { ok: true, score: graded.score, correct: graded.correct, total: graded.total, ranked: graded.ranked, ...overall, round: { place, players: rows.length, board: boardFor(rows, auth.userId).slice(0, BOARD_ROWS) } }, origin);
+    return result(200, { ok: true, score: graded.score, correct: graded.correct, total: graded.total, ranked: graded.ranked, ...overall, feedText: resultText(graded, true), round: { place, players: rows.length, board: boardFor(rows, auth.userId).slice(0, BOARD_ROWS) } }, origin);
   }
   if (graded.total < 5 || graded.total > 30) return fail(422, 'INVALID_RESULT', 'Недопустимое число вопросов.', origin);
   const overall = await stats.recordGame(auth.userId, auth.name, graded);
-  return result(200, { ok: true, score: graded.score, correct: graded.correct, total: graded.total, ranked: graded.ranked, ...overall }, origin);
+  return result(200, { ok: true, score: graded.score, correct: graded.correct, total: graded.total, ranked: graded.ranked, ...overall, feedText: resultText(graded, true) }, origin);
 }
 
 /** The web app asks for a round for the chat it was opened from: the message goes out with answerWebAppQuery. */
@@ -312,7 +314,21 @@ async function playerAction(body, origin) {
   if (error) return error;
   try {
     switch (body.action) {
-      case 'round': return await roundInfo(auth, origin);
+      case 'round': return await roundInfo(auth, origin, body.roundId);
+      case 'myRounds': {
+        const list = await stats.roundsOfUser(auth.userId);
+        return result(200, {
+          ok: true,
+          rounds: list.map(({ round, created, played, rows }) => {
+            const mine = rows.findIndex((r) => r.userId === auth.userId);
+            return {
+              id: round.id, cats: round.cats, difficulty: round.difficulty, count: round.ids.length, createdAt: round.createdAt, expiresAt: round.expiresAt,
+              closed: stats.isClosed(round), created, played, players: rows.length,
+              myPlace: mine >= 0 ? mine + 1 : null, myScore: mine >= 0 ? rows[mine].score : null,
+            };
+          }),
+        }, origin);
+      }
       case 'record': return await recordAction(body, auth, origin);
       case 'createRound': return await createRoundAction(body, auth, origin);
       case 'share': return await shareAction(body, auth, origin);
@@ -469,9 +485,10 @@ async function handleCallback(query) {
     const round = await stats.getRound(parts[2]);
     if (!round) { await answer({ text: 'Раунд не найден', show_alert: true }); return; }
     if (round.creatorId !== String(query.from?.id || '')) { await answer({ text: 'Завершить раунд может только его создатель', show_alert: true }); return; }
+    // Answer first: the platform waits for it only a few seconds, and closing (storage write + editing the message) can take longer.
+    await answer({ text: 'Раунд завершён' });
     if (!stats.isClosed(round)) await stats.closeRound(round);
     await closeIfExpired(round);
-    await answer({ text: 'Раунд завершён' });
     return;
   }
   const cmd = parts[1];
