@@ -1681,6 +1681,20 @@ async function handleChatMessage(message, deadlineAt, dispatchAsync = null) {
 
   const command = text.startsWith('/') ? text.split(/\s+/)[0].split('@')[0].toLowerCase() : '';
 
+  /*
+    В канале платформа отдаёт боту ВСЕ посты (бот там администратор), в том числе свои собственные новости,
+    поэтому без упоминания молчим: иначе бот «отвечает» на каждый пост. В группе и обсуждении отвечаем
+    ещё на команды и на ответы боту, в личке — на всё.
+  */
+  const chatType = message.chat?.type;
+  const isDirect = !chatType || chatType === 'private';
+  const isReplyToBot = message.reply_to_message?.from_bot === true;
+
+  if (!isDirect && !wasMentioned && !(command && chatType !== 'channel') && !(isReplyToBot && chatType !== 'channel')) {
+    log('INFO', 'chat_message_ignored', { chatId, chatType, reason: 'no_mention' });
+    return;
+  }
+
   if (command === '/start') {
     await vvelcomApi('sendMessage', { chat_id: chatId, text: START_TEXT });
     return;
