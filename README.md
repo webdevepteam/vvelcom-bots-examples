@@ -24,6 +24,7 @@ curl -X POST "https://apibots.vvelcom.online/bot$VVELCOM_BOT_TOKEN/deleteWebhook
 |---|---|---|
 | [`echo-python`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/echo-python) | Python 3.10+ | Самый короткий эхо-бот без фреймворка |
 | [`echo-js`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/echo-js) | Node.js 18+ | Базовая работа с Bot API через встроенный `fetch` |
+| [`space-admin-js`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/space-admin-js) | Node.js 20.6+ | Бот-администратор пространства: приветствие новых участников, группы с разделами, команды владельца |
 | [`yandex-ai-python`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/yandex-ai-python) | Python 3.10+ | Диалог с YandexGPT через Yandex Cloud AI Studio |
 | [`yandex-ai-function-python`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/yandex-ai-function-python) | Yandex Cloud Functions, Python 3.12 | Рекомендуемый серверный ИИ-бот с webhook и командами |
 | [`sudoku`](https://github.com/webdevepteam/vvelcom-bots-examples/tree/main/sudoku) | Yandex Cloud Functions, Node.js 22 + статический веб-апп | Мини-приложение «Судоку»: `/start` с кнопкой «Играть», результат в чат и «В ленту» |
