@@ -7,9 +7,9 @@
   <meta name="description" content="Судоку для всей семьи: цифры, фрукты, животные, машинки и фигуры. Мини-приложение VVelcom.">
   <title>Судоку — игра в VVelcom</title>
   <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
-  <link rel="stylesheet" href="./styles.css?v=1.4.1">
+  <link rel="stylesheet" href="./styles.css?v=1.5.1">
   <script async src="https://apibots.vvelcom.online/bot-platform/js/vvelcom-web-app.js" onload="window.dispatchEvent(new Event('vvelcom-sdk-ready'))"></script>
-  <script defer src="./app.js?v=1.4.1"></script>
+  <script defer src="./app.js?v=1.5.1"></script>
 </head>
 <body>
   <div class="site-glow" aria-hidden="true"></div>
@@ -57,7 +57,10 @@
         <div class="continue-card hidden" id="continue-card">
           <div class="continue-art" aria-hidden="true">↗</div>
           <div class="continue-text"><strong>Ваше приключение ждёт!</strong><span id="continue-description">Вы начали игру</span></div>
-          <button type="button" class="button button-primary continue-button" id="continue-btn">Продолжить <span aria-hidden="true">→</span></button>
+          <div class="continue-actions">
+            <button type="button" class="button button-primary continue-button" id="continue-btn">Продолжить <span aria-hidden="true">→</span></button>
+            <button type="button" class="button button-secondary continue-button" id="restart-saved-btn">↻ Начать заново</button>
+          </div>
         </div>
 
         <div class="home-columns">

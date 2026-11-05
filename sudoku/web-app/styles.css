@@ -108,3 +108,18 @@ body.is-dragging-symbol .sudoku-board .cell { transition: background-color .09s,
 #dialog-description { white-space: pre-line; }
 .dialog-input { width: 100%; margin: 0 0 16px; padding: 13px 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--card); color: var(--text); font: inherit; font-weight: 700; text-align: center; }
 .dialog-input:focus { outline: none; border-color: var(--purple); }
+.continue-actions{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+.continue-actions .continue-button{margin-left:0}
+@media (max-width:560px){.continue-actions{width:100%}.continue-actions .continue-button{flex:1}}
+/* v1.5: insets reported by the messenger (see applyHostInsets in app.js) replace the guessed
+   78px/42px host clearances and env(safe-area-*). Top: under the header 0, in fullscreen status
+   bar + button row. Bottom: content ends at the system navigation bar, counted once. */
+:root.sdk-insets {
+  --safe-top: var(--vv-safe-top, 0px);
+  --safe-bottom: var(--vv-safe-bottom, 0px);
+  --app-bottom: var(--vv-safe-bottom, 0px);
+  --host-top-clearance: var(--vv-content-top, 0px);
+  --host-bottom-clearance: 0px;
+}
+:root.sdk-insets body.is-embedded .app-shell { padding-top: calc(12px + var(--safe-top) + var(--host-top-clearance)); padding-bottom: 0; }
+:root.sdk-insets body.is-embedded .footer { padding-bottom: calc(10px + var(--safe-bottom)); }

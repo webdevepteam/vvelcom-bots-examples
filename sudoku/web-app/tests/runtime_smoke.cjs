@@ -19,6 +19,7 @@ class Elem {
   trigger(name,event={}){for(const fn of this.listeners[name]||[])fn({target:this,...event})}
   click(){this.trigger('click')}
   focus(){}
+  closest(){return null}
 }
 const html=fs.readFileSync(root+'/index.html','utf8');
 const ids=[...html.matchAll(/id="([^"]+)"/g)].map(x=>x[1]);
@@ -28,6 +29,7 @@ const charSticker=new Elem('div');
 const document={
   hidden:false,
   body:new Elem('body'),
+  documentElement:new Elem('html'),
   createElement:(tag)=>new Elem(tag),
   createDocumentFragment:()=>new Elem('#fragment'),
   querySelector:(sel)=>{if(sel.startsWith('#'))return nodes[sel.slice(1)];if(sel==='.character-sticker')return charSticker;if(sel.startsWith('meta['))return new Elem('meta');if(sel.startsWith('.cell[data-index=')){const ix=Number(sel.match(/"(\d+)"/)[1]);return nodes['sudoku-board'].children[ix]}return null},
@@ -35,7 +37,8 @@ const document={
   addEventListener(){},
 };
 const storage={};const localStorage={getItem:(k)=>storage[k]||null,setItem:(k,v)=>{storage[k]=v}};
-const windowObj={scrollTo(){},setTimeout(fn){return 1},setInterval(){},addEventListener(){},removeEventListener(){},location:{search:''}};
+// SDK «already loaded» (no user id → anonymous key), so waitForSdk() does not wait on a timer.
+const windowObj={VVelcom:{WebApp:{}},scrollTo(){},setTimeout(fn){return 1},setInterval(){},addEventListener(){},removeEventListener(){},location:{search:''}};
 const ctx={document,window:windowObj,URLSearchParams,localStorage,navigator:{},console,fetch:async()=>({ok:true,json:async()=>JSON.parse(fs.readFileSync(root+'/data/puzzles.json','utf8'))}),setTimeout:()=>1,clearTimeout(){},Math,JSON,Date};
 const puzzleState=()=>JSON.parse(storage['vvelcom.sudoku.v1:browser']);
 const cell=(i)=>nodes['sudoku-board'].children[i];
@@ -82,6 +85,22 @@ const run=async()=>{
   assert.equal(gameAfterRestart.paused,false);
   nodes['pause-btn'].click();assert.equal(puzzleState().game.paused,true);
   nodes['resume-btn'].click();assert.equal(puzzleState().game.paused,false);
-  console.log('PASS runtime: initialization, choices, errors, undo, notes, hint, victory, 9x9 and pause');
+  // Saved game on the home screen: continue / start over.
+  const e=gameAfterRestart.puzzle.givens.indexOf(0);
+  cell(e).click();keypad(gameAfterRestart.puzzle.solution[e]).click();
+  nodes['back-home'].click();
+  assert.equal(nodes['continue-card'].classList.contains('hidden'),false,'continue card shown');
+  nodes['start-btn'].click();
+  assert.equal(nodes['dialog-title'].textContent,'У вас есть незаконченная игра');
+  nodes['dialog-buttons'].children[0].click();
+  assert.equal(puzzleState().game.board[e],gameAfterRestart.puzzle.solution[e],'continue keeps progress');
+  nodes['back-home'].click();
+  nodes['restart-saved-btn'].click();
+  assert.equal(nodes['dialog-title'].textContent,'Начать заново?');
+  nodes['dialog-buttons'].children[0].click();
+  assert.equal(puzzleState().game.puzzle.id,gameAfterRestart.puzzle.id);
+  assert.deepEqual(puzzleState().game.board,gameAfterRestart.puzzle.givens,'start over clears board');
+  assert.equal(puzzleState().game.elapsed,0,'start over resets timer');
+  console.log('PASS runtime: initialization, choices, errors, undo, notes, hint, victory, 9x9, pause, continue/start over');
 };
 run().catch(e=>{console.error(e);process.exitCode=1});

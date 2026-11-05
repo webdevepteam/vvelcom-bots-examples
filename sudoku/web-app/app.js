@@ -51,14 +51,32 @@
     try { localStorage.setItem(key, JSON.stringify(value)); }
     catch { /* Private mode / disabled storage: game still works in memory. */ }
   }
+  const BROWSER_KEY = `${STORAGE}:browser`;
   function storageKey() {
     // Client-side separation only. initDataUnsafe is NOT trusted identity proof.
     const id = sdk?.initDataUnsafe?.user?.id;
     return `${STORAGE}:${typeof id === 'string' && /^[\w-]{1,100}$/.test(id) ? id : 'browser'}`;
   }
+  // The user's own key wins; the anonymous «browser» key is a fallback, so a game saved
+  // before the SDK connected (slow start, or opened outside VVelcom) is not lost.
+  function readProfile() {
+    const own = readJSON(storageKey(), null);
+    if (own && own.version === 1) return own;
+    const fallback = storageKey() !== BROWSER_KEY ? readJSON(BROWSER_KEY, null) : null;
+    return fallback && fallback.version === 1 ? fallback : null;
+  }
+  // The SDK script loads async; wait for it a little so the profile is read from the right key.
+  function waitForSdk(timeout = 1500) {
+    if (window.VVelcom?.WebApp || window.Telegram?.WebApp) return Promise.resolve();
+    return new Promise((resolve) => {
+      const done = () => { clearTimeout(timer); window.removeEventListener('vvelcom-sdk-ready', done); resolve(); };
+      const timer = setTimeout(done, timeout);
+      window.addEventListener('vvelcom-sdk-ready', done);
+    });
+  }
   function loadProfile() {
-    const profile = readJSON(storageKey(), null);
-    if (!profile || profile.version !== 1) return;
+    const profile = readProfile();
+    if (!profile) return;
     if (profile.preferences && PACKS[profile.preferences.skin]) preferences.skin = profile.preferences.skin;
     if (profile.preferences && ['light', 'dark'].includes(profile.preferences.theme)) preferences.theme = profile.preferences.theme;
     if (profile.preferences && [4, 6, 9].includes(profile.preferences.size)) preferences.size = profile.preferences.size;
@@ -115,6 +133,12 @@
       document.body.classList.toggle('is-embedded', embedded);
       sdk.ready?.();
       sdk.expand?.();
+      applyHostInsets();
+      try {
+        sdk.onEvent?.('safeAreaChanged', applyHostInsets);
+        sdk.onEvent?.('contentSafeAreaChanged', applyHostInsets);
+        sdk.onEvent?.('fullscreenChanged', applyHostInsets);
+      } catch { /* older SDK: the initial values are enough */ }
       if (typeof sdk.setHeaderColor === 'function') sdk.setHeaderColor(preferences.theme === 'dark' ? '#171525' : '#f8f7fe');
       sdk.BackButton?.onClick?.(() => {
         if (dialogState) closeDialog();
@@ -126,6 +150,21 @@
         loadProfile(); renderHome();
       }
     } catch (error) { console.warn('VVelcom SDK unavailable:', error); }
+  }
+  // The messenger reports its own insets: with its header shown the page starts right under it
+  // (top 0); in fullscreen top = status bar, content top = its ✕ ⌄ ⋮ row; bottom = system nav bar.
+  // When they are known, env(safe-area-inset-*) can't be trusted: an Android WebView below the
+  // header still reports the status bar height, which left a big empty band above the page.
+  function applyHostInsets() {
+    const root = document.documentElement;
+    const safe = sdk?.safeAreaInset;
+    const content = sdk?.contentSafeAreaInset;
+    const px = (v) => `${Math.max(0, Number(v) || 0)}px`;
+    root.classList.toggle('sdk-insets', Boolean(safe));
+    if (!safe) return;
+    root.style.setProperty('--vv-safe-top', px(safe.top));
+    root.style.setProperty('--vv-content-top', px(content?.top));
+    root.style.setProperty('--vv-safe-bottom', px((Number(safe.bottom) || 0) + (Number(content?.bottom) || 0)));
   }
   function updateHostBack() {
     try { if (dialogState || page === 'game') sdk?.BackButton?.show?.(); else sdk?.BackButton?.hide?.(); }
@@ -688,6 +727,35 @@
     if (!game || game.finished) return startNewGame(game?.puzzle.level || preferences.level);
     openDialog({ kind: 'new', art: '🎲', title: 'Другая головоломка?', text: 'Текущий прогресс будет заменён новой игрой. Начнём сначала?', actions: [{ label: 'Да, новую!', primary: true, fn: () => startNewGame(game.puzzle.level) }, { label: 'Остаться здесь', fn: closeDialog }] });
   }
+  const hasSavedGame = () => Boolean(game && !game.finished);
+  // Home «Начать заново»: the same saved puzzle from a clean board, timer and hints reset.
+  function restartSavedFromScratch() {
+    if (!hasSavedGame()) return;
+    const skin = game.skin;
+    game = createGame(game.puzzle);
+    game.skin = skin;
+    resetCellTap(); closeDialog(); showGame(); vib(); saveProfile();
+  }
+  function askRestartSaved() {
+    if (!hasSavedGame()) return;
+    openDialog({ kind: 'restart-saved', art: '↻', title: 'Начать заново?',
+      text: 'Сохранённый прогресс этой головоломки удалится: поле, заметки, время и подсказки начнутся с нуля.',
+      actions: [
+        { label: 'Начать заново', primary: true, fn: restartSavedFromScratch },
+        { label: 'Новая головоломка', fn: () => startNewGame() },
+        { label: 'Отмена', fn: closeDialog },
+      ] });
+  }
+  // «Играть» would silently replace an unfinished game — ask first.
+  function askStartFromHome() {
+    if (!hasSavedGame()) return startNewGame();
+    openDialog({ kind: 'start-over', art: '🧩', title: 'У вас есть незаконченная игра',
+      text: `${LEVELS[game.puzzle.level].label} · ${game.puzzle.size} × ${game.puzzle.size} · ${formatTime(game.elapsed)}. Продолжить её или начать новую?`,
+      actions: [
+        { label: 'Продолжить', primary: true, fn: () => { closeDialog(); showGame(); } },
+        { label: 'Начать новую', fn: () => startNewGame() },
+      ] });
+  }
   function showRules() {
     openDialog({ kind: 'rules', art: '🧩', title: 'Как играть?', text: 'Заполните строки, столбцы и блоки разными символами. Нажмите на клетку и выберите символ или удерживайте его и перетащите. Дважды быстро нажмите на свою цифру, чтобы стереть её. «Заметки» — маленькие варианты в пустой клетке: включите режим, отметьте возможные числа, затем выключите его перед окончательным ответом. «Начать сначала» очищает поле, но не сбрасывает время.', actions: [{ label: 'Всё понятно, играем!', primary: true, fn: closeDialog }] });
   }
@@ -722,8 +790,9 @@
     $('#help-btn').addEventListener('click', showRules);
     $('#rating-btn').addEventListener('click', () => void showLeaderboard('all'));
     $$('.size-card').forEach((b) => b.addEventListener('click', () => selectSize(Number(b.dataset.size))));
-    $('#start-btn').addEventListener('click', () => startNewGame());
+    $('#start-btn').addEventListener('click', askStartFromHome);
     $('#continue-btn').addEventListener('click', showGame);
+    $('#restart-saved-btn').addEventListener('click', askRestartSaved);
     $('#back-home').addEventListener('click', showHome);
     $('#pause-btn').addEventListener('click', togglePause);
     $('#resume-btn').addEventListener('click', togglePause);
@@ -770,6 +839,7 @@
         }
       } catch { /* Gameplay remains usable if the sharing service is not configured. */ }
       if (!catalog.every((p) => LEVELS[p.level] && p.size === LEVELS[p.level].size && p.givens?.length === p.size * p.size && p.solution?.length === p.givens.length)) throw new Error('Недопустимый формат puzzles.json');
+      await waitForSdk();
       integrateWebApp();
       loadProfile(); applyTheme();renderHome();
       $('#start-btn').disabled = false;
