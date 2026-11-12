@@ -4,7 +4,7 @@ import json, random, datetime
 from pathlib import Path
 random.seed(20261014)
 ROOT=Path(__file__).resolve().parents[1]
-LEVELS=[('mini',4,2,2,8,6),('junior',6,2,3,18,6),('classic',9,3,3,37,7),('challenge',9,3,3,30,7),('master',9,3,3,26,5)]
+LEVELS=[('mini',4,2,2,8,20),('junior',6,2,3,18,20),('classic',9,3,3,37,20),('challenge',9,3,3,30,20),('master',9,3,3,26,20)]
 
 def build_solution(size, br, bc):
     # Permute bands, stacks, rows inside bands and columns inside stacks.
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         used=set()
         for i in range(1,num+1):
             best=None
-            for attempt in range(22):
+            for attempt in range(40):
                 sol=build_solution(n,br,bc)
                 giv=carve(sol,n,br,bc,clue_target)
                 sig=tuple(giv)
@@ -81,5 +81,8 @@ if __name__ == "__main__":
             puzzles.append({'id':f'{lid}-{i:02}', 'level':lid,'size':n,'boxRows':br,'boxCols':bc,'givens':giv,'solution':sol})
         print(lid,num,'clues',sorted(sum(map(bool,p['givens'])) for p in puzzles if p['level']==lid))
     result={'version':1,'description':'Unique-solution Sudoku puzzles. 0 denotes an empty cell. All data is public; no tokens or personal information.', 'levels':{'mini':{'title':'Малыш','size':4,'label':'Новичок'},'junior':{'title':'Искатель','size':6,'label':'Легко'},'classic':{'title':'Знаток','size':9,'label':'Средне'},'challenge':{'title':'Смельчак','size':9,'label':'Сложно'},'master':{'title':'Легенда','size':9,'label':'Эксперт'}},'puzzles':puzzles}
-    path=ROOT/'data/puzzles.json';path.write_text(json.dumps(result,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+    serialized = json.dumps(result,ensure_ascii=False,separators=(',',':'))
+    path=ROOT/'data/puzzles.json';path.write_text(serialized,encoding='utf-8')
+    cloud_path=ROOT.parent/'cloud-function/puzzles.json'
+    if cloud_path.parent.exists(): cloud_path.write_text(serialized,encoding='utf-8')
     print(len(puzzles),'puzzles',path.stat().st_size,'bytes')
