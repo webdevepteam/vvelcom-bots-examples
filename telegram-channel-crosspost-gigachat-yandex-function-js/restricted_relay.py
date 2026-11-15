@@ -24,7 +24,7 @@ import threading
 import time
 import uuid
 from collections import deque
-from logging.handlers import WatchedFileHandler
+from logging.handlers import TimedRotatingFileHandler
 from urllib.parse import urlparse
 
 from flask import Flask, jsonify, request
@@ -83,7 +83,14 @@ logger.propagate = False
 
 if not logger.handlers:
     try:
-        log_handler = WatchedFileHandler(LOG_FILE, encoding="utf-8")
+        log_handler = TimedRotatingFileHandler(
+            LOG_FILE,
+            when="midnight",
+            interval=1,
+            backupCount=1,
+            encoding="utf-8",
+            utc=False,
+        )
     except OSError:
         # Log file is not writable: write to stderr (it ends up in journalctl).
         log_handler = logging.StreamHandler(sys.stderr)
