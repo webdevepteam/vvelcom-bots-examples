@@ -172,6 +172,20 @@ async function playerAction(body, origin) {
       const game = validateGame(body);
       if (!game) return result(422, {ok:false,code:'INVALID_RESULT',message:'Результат не соответствует заданию.'}, origin);
       const saved = await stats.recordGame(auth.userId, auth.name, game);
+      // A game played without a connection reaches the server later: the bot tells the player in
+      // their chat with it, with the same «В ленту» button, so the result can still be shared.
+      if (body.late === true && !saved.duplicate) {
+        try {
+          const chatId = await stats.chatOf(auth.userId);
+          if (chatId) {
+            await callBotApi('sendMessage', {chat_id: chatId,
+              text: '📶 Эта партия сыграна без интернета и теперь засчитана в рейтинге!\n\n' +
+                buildText(game).split('\n').slice(2, 7).join('\n') +
+                (saved.place ? `\n🏆 Место в рейтинге: ${saved.place} из ${saved.total}` : ''),
+              reply_markup: {inline_keyboard: [[{text: '📣 В ленту', share_to_feed: {text: buildText(game, true)}}]]}});
+          }
+        } catch (error) { console.error('late result message failure', error.name || 'Error', error.statusCode || ''); }
+      }
       return result(200, {ok:true, ...saved}, origin);
     }
     if (body.action === 'rename') {
@@ -276,6 +290,10 @@ async function webhook(event) {
     }
     const message = update?.message;
     if (!message?.chat?.id || message.from?.is_bot) return result(200, {ok:true});
+    // Remember the private chat: it is where the bot reports games that were played offline.
+    if (message.from?.id && (!message.chat.type || message.chat.type === 'private')) {
+      await stats.setChat(String(message.from.id), profileNameOf(message.from), message.chat.id).catch(() => {});
+    }
     const text = typeof message.text === 'string' ? message.text.trim() : '';
     if (/^\/(start|play)(?:@\S+)?(?:\s|$)/i.test(text)) {
       const gameUrl = process.env.GAME_URL || '';

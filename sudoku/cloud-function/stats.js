@@ -111,7 +111,19 @@ async function recordGame(userId, profileName, game) {
     await writePlayer(player);
   }
   const board = await leaderboard('all', 0, userId);
-  return { score, ranked, newBest, rating: ratingOf(player), place: board.me?.place ?? null, total: board.total };
+  return { score, ranked, newBest, duplicate: Boolean(duplicate), rating: ratingOf(player), place: board.me?.place ?? null, total: board.total };
+}
+
+/** The player's private chat with the bot (remembered when they write to it): where the bot can message them. */
+async function setChat(userId, profileName, chatId) {
+  const player = await ensurePlayer(userId, profileName);
+  if (player.chatId === String(chatId)) return;
+  player.chatId = String(chatId);
+  await writePlayer(player);
+}
+async function chatOf(userId) {
+  const player = await readPlayer(userId);
+  return player?.chatId || null;
 }
 
 async function setName(userId, profileName, rawName) {
@@ -192,4 +204,4 @@ function statsText(stats, invite = '') {
   return lines.join('\n');
 }
 
-module.exports = { LEVELS, computeScore, isPlausible, cleanName, recordGame, setName, leaderboard, playerStats, statsText, ratingOf };
+module.exports = { setChat, chatOf, LEVELS, computeScore, isPlausible, cleanName, recordGame, setName, leaderboard, playerStats, statsText, ratingOf };

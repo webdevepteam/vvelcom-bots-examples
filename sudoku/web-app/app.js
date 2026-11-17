@@ -52,10 +52,21 @@
     catch { /* Private mode / disabled storage: game still works in memory. */ }
   }
   const BROWSER_KEY = `${STORAGE}:browser`;
+  const LAST_USER_KEY = `${STORAGE}:lastUser`;
   function storageKey() {
     // Client-side separation only. initDataUnsafe is NOT trusted identity proof.
-    const id = sdk?.initDataUnsafe?.user?.id;
-    return `${STORAGE}:${typeof id === 'string' && /^[\w-]{1,100}$/.test(id) ? id : 'browser'}`;
+    const raw = sdk?.initDataUnsafe?.user?.id;
+    const id = typeof raw === 'number' ? String(raw) : raw;
+    const valid = (v) => typeof v === 'string' && /^[\w-]{1,100}$/.test(v);
+    if (valid(id)) {
+      // Remember who played last: when the host gives no user (opened without the messenger's
+      // data, e.g. offline), the same player's saved game is still found.
+      try { localStorage.setItem(LAST_USER_KEY, id); } catch { /* storage unavailable */ }
+      return `${STORAGE}:${id}`;
+    }
+    let last = null;
+    try { last = localStorage.getItem(LAST_USER_KEY); } catch { /* storage unavailable */ }
+    return `${STORAGE}:${valid(last) ? last : 'browser'}`;
   }
   // The user's own key wins; the anonymous «browser» key is a fallback, so a game saved
   // before the SDK connected (slow start, or opened outside VVelcom) is not lost.
@@ -561,9 +572,42 @@
       return response.ok && data.ok ? data : null;
     } catch { return null; } finally { clearTimeout(timer); }
   }
+  // Results of games finished without a connection (or while the server was unreachable) wait here
+  // and are sent to the rating the next time the player is online. Kept per player, in localStorage.
+  const pendingKey = () => `${storageKey()}:pending`;
+  function readPending() {
+    const list = readJSON(pendingKey(), []);
+    return Array.isArray(list) ? list : [];
+  }
+  function enqueueResult(payload) {
+    const list = readPending();
+    if (list.some((item) => item.puzzleId === payload.puzzleId && item.elapsed === payload.elapsed && item.mistakes === payload.mistakes)) return;
+    list.push({ ...payload, tries: 0 });
+    writeJSON(pendingKey(), list.slice(-50));
+  }
+  let flushing = false;
+  async function flushPending() {
+    if (flushing || !backendUrl || !sdk?.initData || !readPending().length) return;
+    flushing = true;
+    try {
+      for (const item of readPending()) {
+        const { tries, ...payload } = item;
+        const data = await callApi({ action: 'record', late: true, ...payload });
+        const rest = readPending().filter((x) => !(x.puzzleId === item.puzzleId && x.elapsed === item.elapsed && x.mistakes === item.mistakes));
+        if (data) { writeJSON(pendingKey(), rest); continue; }
+        if (!navigator.onLine) break;
+        // Online but refused (e.g. an invalid result): give up on it after a few tries.
+        if (tries >= 4) writeJSON(pendingKey(), rest);
+        else writeJSON(pendingKey(), readPending().map((x) => (x.puzzleId === item.puzzleId && x.elapsed === item.elapsed && x.mistakes === item.mistakes ? { ...x, tries: tries + 1 } : x)));
+      }
+    } finally { flushing = false; }
+  }
   async function recordResult(g) {
-    const data = await callApi({ action: 'record', puzzleId: g.puzzle.id, board: g.board.slice(), elapsed: g.elapsed, mistakes: g.mistakes, hintsUsed: 3 - g.hints });
-    if (!data || dialogState !== 'win') return;
+    const payload = { puzzleId: g.puzzle.id, board: g.board.slice(), elapsed: g.elapsed, mistakes: g.mistakes, hintsUsed: 3 - g.hints };
+    const data = await callApi({ action: 'record', ...payload });
+    if (!data) { enqueueResult(payload); return; }
+    void flushPending();
+    if (dialogState !== 'win') return;
     const place = data.place ? ` · ${data.place}-е место из ${data.total}` : '';
     $('#dialog-description').textContent = `Головоломка «${LEVELS[g.puzzle.level].label}» решена!\n🏅 Очки: ${data.score}${data.newBest ? ' — новый личный рекорд!' : ''}\nРейтинг: ${data.rating}${place}`;
   }
@@ -810,6 +854,7 @@
     document.addEventListener('visibilitychange', () => { if (document.hidden && game && !game.finished && page === 'game') { game.paused = true; renderGame(); saveProfile(); } });
     window.addEventListener('pagehide', saveProfile);
     window.addEventListener('vvelcom-sdk-ready', integrateWebApp);
+    window.addEventListener('online', () => void flushPending());
     window.setInterval(() => {
       if (game && page === 'game' && !game.finished && !game.paused && (!dialogState || dialogState === 'restart') && !document.hidden) {
         game.elapsed++;$('#timer-text').textContent = formatTime(game.elapsed);if (game.elapsed % 3 === 0) saveProfile();
@@ -842,6 +887,7 @@
       await waitForSdk();
       integrateWebApp();
       loadProfile(); applyTheme();renderHome();
+      void flushPending();
       $('#start-btn').disabled = false;
       $('#start-btn').innerHTML = 'Играть <span aria-hidden="true">→</span>';
     } catch (err) {
